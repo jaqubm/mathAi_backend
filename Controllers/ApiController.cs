@@ -10,14 +10,24 @@ public class ApiController(IConfiguration config) : ControllerBase
     public IActionResult GetStatus()
     {
         ChatClient client = new(model: "gpt-4o-mini", config.GetSection("AppSettings:OpenAIApiKey").Value ?? "");
-        
-        ChatCompletion completion = client.CompleteChat("Say 'this is a test.'");
 
-        Console.WriteLine($"[ASSISTANT]: {completion}");
-        
-        return Ok(new Dictionary<string, string>
+        try
         {
-            { "apiStatus", "OK" },
-        });
+            ChatCompletion completion = client.CompleteChat("Write OK if connection was successful");
+
+            return Ok(new Dictionary<string, string>
+            {
+                { "apiStatus", "OK" },
+                { "openAIApiConnectionStatus", completion.ToString() }
+            });
+        }
+        catch
+        {
+            return Ok(new Dictionary<string, string>
+            {
+                { "apiStatus", "OK" },
+                { "openAIApiConnectionStatus", "Failed" }
+            });
+        }
     }
 }
