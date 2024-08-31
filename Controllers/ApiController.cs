@@ -9,7 +9,7 @@ public class ApiController(IConfiguration config) : ControllerBase
     [HttpGet("status")]
     public IActionResult GetStatus()
     {
-        ChatClient client = new(model: "gpt-4o-mini", config.GetSection("AppSettings:OpenAIApiKey").Value ?? "");
+        ChatClient client = new(model: "gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "");
 
         try
         {
