@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using OpenAI.Chat;
 
 namespace mathAi_backend.Controllers;
 
