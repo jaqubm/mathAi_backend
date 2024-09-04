@@ -17,6 +17,12 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+          
+      - name: Inject OpenAI API Key into appsettings.json
+        run: |
+          $fileContent = Get-Content -Path "./appsettings.json"
+          $fileContent = $fileContent -replace '"OpenAiApiKey": "KEY"', '"OpenAiApiKey": "${{ secrets.OPENAI_API_KEY }}"'
+          Set-Content -Path "./appsettings.json" -Value $fileContent
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
