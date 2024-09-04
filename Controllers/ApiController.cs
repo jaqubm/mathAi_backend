@@ -9,10 +9,10 @@ public class ApiController(IConfiguration config) : ControllerBase
     [HttpGet("status")]
     public IActionResult GetStatus()
     {
-        ChatClient client = new(model: "gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "");
-
         try
         {
+            ChatClient client = new(model: "gpt-4o-mini", config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
+            
             ChatCompletion completion = client.CompleteChat("Write OK if connection was successful");
 
             return Ok(new Dictionary<string, string>
