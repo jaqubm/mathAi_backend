@@ -1,4 +1,5 @@
 using System.Text;
+using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -30,7 +31,7 @@ builder.Services.AddCors(options =>
 });
 
 // Adding scoped connection between Repositories Interfaces and Repositories Classes
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Setting up Authentication - JwtBearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
