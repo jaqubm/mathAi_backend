@@ -12,8 +12,7 @@ public static class AuthHelper
         return new User(
             userId: payload.Subject,
             name: payload.Name,
-            email: payload.Email,
-            picture: payload.Picture
+            email: payload.Email
         );
     }
 }
