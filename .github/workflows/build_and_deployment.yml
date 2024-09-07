@@ -18,6 +18,12 @@ jobs:
         with:
           dotnet-version: '8.x'
           
+      - name: Inject Azure SQL Connection String into appsettings.json
+        run: |
+          $fileContent = Get-Content -Path "./appsettings.json"
+          $fileContent = $fileContent -replace '"AzureSQL": "KEY"', '"AzureSQL": "${{ secrets.AZURE_SQL_CONNECTION_STRING }}"'
+          Set-Content -Path "./appsettings.json" -Value $fileContent    
+          
       - name: Inject OpenAI API Key into appsettings.json
         run: |
           $fileContent = Get-Content -Path "./appsettings.json"

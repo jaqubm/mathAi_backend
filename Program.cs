@@ -1,6 +1,4 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using mathAi_backend.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,22 +28,7 @@ builder.Services.AddCors(options =>
 });
 
 // Adding scoped connection between Repositories Interfaces and Repositories Classes
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-// Setting up Authentication - JwtBearer
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    builder.Configuration.GetSection("AppSettings:TokenKey").Value ??= "")),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
