@@ -23,6 +23,6 @@ public class DataContext(IConfiguration config) : DbContext
         
         // Connecting Entities with DB
         modelBuilder.Entity<User>()
-            .HasKey(u => u.UserId);
+            .HasKey(u => u.Email);
     }
 }
