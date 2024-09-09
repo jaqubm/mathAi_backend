@@ -7,6 +7,8 @@ public interface IUserRepository
     public bool SaveChanges();
     
     public void AddEntity<T>(T entity);
-    
-    public bool UserAlreadyExist(string userId);
+    public void UpdateEntity<T>(T entity);
+
+    public User GetUserByEmail(string email);
+    public bool UserAlreadyExist(string email);
 }

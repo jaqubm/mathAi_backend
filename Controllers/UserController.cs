@@ -13,10 +13,10 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c => 
     {
-        c.CreateMap<User, UserDto>();
+        c.CreateMap<UserDto, User>();
     }));
 
-    [HttpPost("login")]
+    [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] string accessToken)
     {
         if (string.IsNullOrEmpty(accessToken))
@@ -26,18 +26,39 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         {
             var user = await AuthHelper.GetUserFromGoogleToken(accessToken);
             
-            if (userRepository.UserAlreadyExist(user.UserId)) return Ok();
+            if (userRepository.UserAlreadyExist(user.Email)) return Ok();
         
             userRepository.AddEntity(user);
         
             if (userRepository.SaveChanges()) return Ok();
 
-            throw new Exception("Failed to add user to database");
+            throw new Exception("Failed to add user to database!");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             return Unauthorized(e.Message);
         }
+    }
+
+    [HttpGet("IsTeacher/{email}")]
+    public bool IsTeacher([FromRoute] string email)
+    {
+        var user = userRepository.GetUserByEmail(email);
+    
+        return user.IsTeacher;
+    }
+
+    [HttpPut("UpdateToTeacher/{email}")]
+    public IActionResult UpdateToTeacher([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        userDb.IsTeacher = true;
+
+        userRepository.UpdateEntity(userDb);
+        
+        if (userRepository.SaveChanges()) return Ok();
+
+        throw new Exception("Failed to update account to teacher account!");
     }
 }

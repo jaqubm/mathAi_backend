@@ -2,9 +2,9 @@ CREATE SCHEMA mathAi;
 
 CREATE TABLE mathAi.[User]
 (
-    UserId NVARCHAR(255) NOT NULL PRIMARY KEY,  -- Corresponds to the 'userId' property
-    Name NVARCHAR(255) NOT NULL,                -- Corresponds to the 'name' property
-    Email NVARCHAR(255) NOT NULL,               -- Corresponds to the 'email' property
+    Email NVARCHAR(255) NOT NULL PRIMARY KEY ,  -- Corresponds to the 'Email' property
+    Name NVARCHAR(255) NOT NULL,                -- Corresponds to the 'Name' property
+    IsTeacher BIT NOT NULL DEFAULT 0,           -- Corresponds to the 'IsTeacher' property
 );
 
 DROP TABLE mathAi.[User];

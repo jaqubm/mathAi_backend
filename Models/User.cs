@@ -2,17 +2,30 @@ using System.ComponentModel.DataAnnotations;
 
 namespace mathAi_backend.Models;
 
-public class User(string userId, string name, string email)
+public class User
 {
     [Key]
+    [Required]
     [MaxLength(255)]
-    public string UserId { get; init; } = userId;
+    public string Email { get; set; }
 
     [Required]
     [MaxLength(255)]
-    public string Name { get; init; } = name;
-
+    public string Name { get; set; }
+    
     [Required]
-    [MaxLength(255)]
-    public string Email { get; init; } = email;
+    public bool IsTeacher { get; set; }
+
+    public User()
+    {
+        Email ??= "";
+        Name ??= "";
+    }
+
+    public User(string email, string name, bool isTeacher = false)
+    {
+        Email = email;
+        Name = name;
+        IsTeacher = isTeacher;
+    }
 }

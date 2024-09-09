@@ -18,10 +18,25 @@ public class UserRepository(IConfiguration config) : IUserRepository
             _entityFramework.Add(entity);
     }
 
-    public bool UserAlreadyExist(string userId)
+    public void UpdateEntity<T>(T entity)
+    {
+        if (entity is not null)
+            _entityFramework.Update(entity);
+    }
+
+    public User GetUserByEmail(string email)
+    {
+        var userDb = _entityFramework.User.FirstOrDefault(u => u.Email == email);
+        
+        if (userDb is null) throw new Exception("Failed to find user with email: " + email);
+        
+        return userDb;
+    }
+
+    public bool UserAlreadyExist(string email)
     {
         var userDb = _entityFramework.User
-            .FirstOrDefault(u => u.UserId == userId);
+            .FirstOrDefault(u => u.Email == email);
 
         return userDb is not null;
     }
