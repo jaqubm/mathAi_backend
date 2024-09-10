@@ -15,6 +15,8 @@ public class User
     
     [Required]
     public bool IsTeacher { get; set; }
+    
+    public bool FirstTimeSignIn { get; set; }
 
     public User()
     {
@@ -22,10 +24,11 @@ public class User
         Name ??= "";
     }
 
-    public User(string email, string name, bool isTeacher = false)
+    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true)
     {
         Email = email;
         Name = name;
         IsTeacher = isTeacher;
+        FirstTimeSignIn = firstTimeSignIn;
     }
 }
