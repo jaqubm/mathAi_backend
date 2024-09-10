@@ -16,8 +16,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         c.CreateMap<UserDto, User>();
     }));
 
-    [HttpPost("Login")]
-    public async Task<IActionResult> Login([FromBody] string accessToken)
+    [HttpPost("SignIn")]
+    public async Task<IActionResult> SignIn([FromBody] string accessToken)
     {
         if (string.IsNullOrEmpty(accessToken))
             return Unauthorized("Access token is required.");
@@ -40,6 +40,14 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         }
     }
 
+    [HttpGet("FirstTimeSignIn/{email}")]
+    public bool FirstTimeSignIn([FromRoute] string email)
+    {
+        var user = userRepository.GetUserByEmail(email);
+        
+        return user.FirstTimeSignIn;
+    }
+
     [HttpGet("IsTeacher/{email}")]
     public bool IsTeacher([FromRoute] string email)
     {
@@ -54,11 +62,27 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         var userDb = userRepository.GetUserByEmail(email);
         
         userDb.IsTeacher = true;
+        userDb.FirstTimeSignIn = false;
 
         userRepository.UpdateEntity(userDb);
         
         if (userRepository.SaveChanges()) return Ok();
 
         throw new Exception("Failed to update account to teacher account!");
+    }
+    
+    [HttpPut("UpdateToStudent/{email}")]
+    public IActionResult UpdateToStudent([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        userDb.IsTeacher = false;
+        userDb.FirstTimeSignIn = false;
+
+        userRepository.UpdateEntity(userDb);
+        
+        if (userRepository.SaveChanges()) return Ok();
+
+        throw new Exception("Failed to update account to student account!");
     }
 }
