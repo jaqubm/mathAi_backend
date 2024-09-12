@@ -1,7 +1,4 @@
-using AutoMapper;
-using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
-using mathAi_backend.Models;
 using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +8,6 @@ namespace mathAi_backend.Controllers;
 [Route("[controller]")]
 public class UserController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly Mapper _mapper = new(new MapperConfiguration(c => 
-    {
-        c.CreateMap<UserDto, User>();
-    }));
-
     [HttpPost("SignIn")]
     public async Task<IActionResult> SignIn([FromBody] string accessToken)
     {
@@ -29,10 +21,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
             if (userRepository.UserAlreadyExist(user.Email)) return Ok();
         
             userRepository.AddEntity(user);
-        
-            if (userRepository.SaveChanges()) return Ok();
-
-            throw new Exception("Failed to add user to database!");
+            
+            return userRepository.SaveChanges() ? Ok() : Unauthorized("Failed to add user to database!");
         }
         catch (Exception e)
         {
@@ -57,7 +47,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
     }
 
     [HttpPut("UpdateToTeacher/{email}")]
-    public IActionResult UpdateToTeacher([FromRoute] string email)
+    public ActionResult UpdateToTeacher([FromRoute] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
         
@@ -66,13 +56,11 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 
         userRepository.UpdateEntity(userDb);
         
-        if (userRepository.SaveChanges()) return Ok();
-
-        throw new Exception("Failed to update account to teacher account!");
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to teacher account!");
     }
     
     [HttpPut("UpdateToStudent/{email}")]
-    public IActionResult UpdateToStudent([FromRoute] string email)
+    public ActionResult UpdateToStudent([FromRoute] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
         
@@ -81,8 +69,6 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 
         userRepository.UpdateEntity(userDb);
         
-        if (userRepository.SaveChanges()) return Ok();
-
-        throw new Exception("Failed to update account to student account!");
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to student account!");
     }
 }
