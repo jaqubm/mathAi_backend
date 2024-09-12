@@ -7,11 +7,11 @@ public class User
     [Key]
     [Required]
     [MaxLength(255)]
-    public string Email { get; set; }
+    public string Email { get; init; }
 
     [Required]
     [MaxLength(255)]
-    public string Name { get; set; }
+    public string Name { get; init; }
     
     [Required]
     public bool IsTeacher { get; set; }

@@ -3,7 +3,7 @@ using mathAi_backend.Models;
 
 namespace mathAi_backend.Repositories;
 
-public class UserRepository(IConfiguration config) : IUserRepository
+public class ExerciseSetRepository(IConfiguration config) : IExerciseSetRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
@@ -24,20 +24,17 @@ public class UserRepository(IConfiguration config) : IUserRepository
             _entityFramework.Update(entity);
     }
 
-    public User GetUserByEmail(string email)
+    public void DeleteEntity<T>(T entity)
     {
-        var userDb = _entityFramework.User.FirstOrDefault(u => u.Email == email);
-        
-        if (userDb is null) throw new Exception("Failed to find user with email: " + email);
-        
-        return userDb;
+        if (entity is not null)
+            _entityFramework.Remove(entity);
     }
 
-    public bool UserAlreadyExist(string email)
+    public ExerciseSet? GetExerciseSetById(string exerciseSetId)
     {
-        var userDb = _entityFramework
-            .Find<User>(email);
-
-        return userDb is not null;
+        var exerciseSetDb = _entityFramework
+            .Find<ExerciseSet>(exerciseSetId);
+        
+        return exerciseSetDb;
     }
 }

@@ -6,6 +6,8 @@ namespace mathAi_backend.Data;
 public class DataContext(IConfiguration config) : DbContext
 {
     public virtual DbSet<User> User { get; set; }
+    public virtual DbSet<Exercise> Exercise { get; set; }
+    public virtual DbSet<ExerciseSet> ExerciseSet { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -24,5 +26,14 @@ public class DataContext(IConfiguration config) : DbContext
         // Connecting Entities with DB
         modelBuilder.Entity<User>()
             .HasKey(u => u.Email);
+        
+        modelBuilder.Entity<Exercise>()
+            .HasOne(e => e.ExerciseSet)
+            .WithMany(es => es.Exercises)
+            .HasForeignKey(e => e.ExerciseSetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExerciseSet>()
+            .HasKey(e => e.ExerciseSetId);
     }
 }
