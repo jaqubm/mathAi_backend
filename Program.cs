@@ -29,6 +29,8 @@ builder.Services.AddCors(options =>
 
 // Adding scoped connection between Repositories Interfaces and Repositories Classes
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddScoped<IExerciseSetRepository, ExerciseSetRepository>();
 
 var app = builder.Build();
 
