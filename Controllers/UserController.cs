@@ -22,7 +22,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         
             userRepository.AddEntity(user);
             
-            return userRepository.SaveChanges() ? Ok() : Unauthorized("Failed to add user to database!");
+            return userRepository.SaveChanges() ? Ok() : Unauthorized("Failed to add user to database.");
         }
         catch (Exception e)
         {
@@ -56,7 +56,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 
         userRepository.UpdateEntity(userDb);
         
-        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to teacher account!");
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to teacher account.");
     }
     
     [HttpPut("UpdateToStudent/{email}")]
@@ -69,6 +69,6 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 
         userRepository.UpdateEntity(userDb);
         
-        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to student account!");
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to student account.");
     }
 }
