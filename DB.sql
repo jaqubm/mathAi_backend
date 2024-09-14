@@ -1,5 +1,6 @@
 CREATE SCHEMA mathAi;
 
+
 CREATE TABLE mathAi.[User]
 (
     Email NVARCHAR(255) NOT NULL PRIMARY KEY,   -- Corresponds to 'Email' property
