@@ -1,5 +1,6 @@
 using mathAi_backend.Data;
 using mathAi_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
@@ -30,10 +31,12 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
             _entityFramework.Remove(entity);
     }
 
-    public ExerciseSet? GetExerciseSetById(string exerciseSetId)
+    public ExerciseSet? GetExerciseSetWithExercisesById(string exerciseSetId)
     {
         var exerciseSetDb = _entityFramework
-            .Find<ExerciseSet>(exerciseSetId);
+            .ExerciseSet
+            .Include(es => es.Exercises)
+            .FirstOrDefault(es => es.Id == exerciseSetId);
         
         return exerciseSetDb;
     }

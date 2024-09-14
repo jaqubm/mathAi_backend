@@ -6,6 +6,6 @@ public class OpenAiRepository(IConfiguration config) : IOpenAiRepository
 {
     public ChatClient CreateChatClient()
     {
-        return new ChatClient(model: "gpt-4o-mini", config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
+        return new ChatClient(model: "gpt-4o", config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
     }
 }

@@ -27,13 +27,19 @@ public class DataContext(IConfiguration config) : DbContext
         modelBuilder.Entity<User>()
             .HasKey(u => u.Email);
         
+        modelBuilder.Entity<ExerciseSet>()
+            .HasKey(e => e.Id);
+        
+        modelBuilder.Entity<ExerciseSet>()
+            .HasOne(es => es.User)
+            .WithMany(u => u.ExerciseSets)
+            .HasForeignKey(es => es.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
         modelBuilder.Entity<Exercise>()
             .HasOne(e => e.ExerciseSet)
             .WithMany(es => es.Exercises)
             .HasForeignKey(e => e.ExerciseSetId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<ExerciseSet>()
-            .HasKey(e => e.ExerciseSetId);
     }
 }
