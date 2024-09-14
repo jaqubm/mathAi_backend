@@ -11,11 +11,11 @@ namespace mathAi_backend.Controllers;
 [Route("[controller]")]
 public class UserController(IUserRepository userRepository) : ControllerBase
 {
-    private readonly Mapper _mapper = new(new MapperConfiguration(c => 
+    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
-        c.CreateMap<UserDto, User>();
-    }));
-
+        c.CreateMap<ExerciseSet, ExerciseSetDto>();
+    })); 
+    
     [HttpPost("SignIn")]
     public async Task<IActionResult> SignIn([FromBody] string accessToken)
     {
@@ -29,10 +29,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
             if (userRepository.UserAlreadyExist(user.Email)) return Ok();
         
             userRepository.AddEntity(user);
-        
-            if (userRepository.SaveChanges()) return Ok();
-
-            throw new Exception("Failed to add user to database!");
+            
+            return userRepository.SaveChanges() ? Ok() : Unauthorized("Failed to add user to database.");
         }
         catch (Exception e)
         {
@@ -41,48 +39,71 @@ public class UserController(IUserRepository userRepository) : ControllerBase
     }
 
     [HttpGet("FirstTimeSignIn/{email}")]
-    public bool FirstTimeSignIn([FromRoute] string email)
+    public ActionResult<bool> FirstTimeSignIn([FromRoute] string email)
     {
-        var user = userRepository.GetUserByEmail(email);
+        var userDb = userRepository.GetUserByEmail(email);
         
-        return user.FirstTimeSignIn;
+        if (userDb is null)
+            return NotFound("User not found.");
+        
+        return Ok(userDb.FirstTimeSignIn);
     }
 
     [HttpGet("IsTeacher/{email}")]
-    public bool IsTeacher([FromRoute] string email)
+    public ActionResult<bool> IsTeacher([FromRoute] string email)
     {
-        var user = userRepository.GetUserByEmail(email);
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null)
+            return NotFound("User not found.");
     
-        return user.IsTeacher;
+        return Ok(userDb.IsTeacher);
     }
 
     [HttpPut("UpdateToTeacher/{email}")]
-    public IActionResult UpdateToTeacher([FromRoute] string email)
+    public ActionResult UpdateToTeacher([FromRoute] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null)
+            return NotFound("User not found.");
         
         userDb.IsTeacher = true;
         userDb.FirstTimeSignIn = false;
 
         userRepository.UpdateEntity(userDb);
         
-        if (userRepository.SaveChanges()) return Ok();
-
-        throw new Exception("Failed to update account to teacher account!");
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to teacher account.");
     }
     
     [HttpPut("UpdateToStudent/{email}")]
-    public IActionResult UpdateToStudent([FromRoute] string email)
+    public ActionResult UpdateToStudent([FromRoute] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null)
+            return NotFound("User not found.");
         
         userDb.IsTeacher = false;
         userDb.FirstTimeSignIn = false;
 
         userRepository.UpdateEntity(userDb);
         
-        if (userRepository.SaveChanges()) return Ok();
+        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to student account.");
+    }
 
-        throw new Exception("Failed to update account to student account!");
+    [HttpGet("GetExerciseSets/{email}")]
+    public ActionResult<List<ExerciseSet>> GetExerciseSets([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null)
+            return NotFound("User not found.");
+
+        var exerciseSets = userRepository.GetUsersExerciseSetsByEmail(email);
+        
+        var exerciseSetsDto = exerciseSets.Select(x => _mapper.Map<ExerciseSetDto>(x)).ToList();
+        
+        return Ok(exerciseSetsDto);
     }
 }

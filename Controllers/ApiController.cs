@@ -1,23 +1,24 @@
 using mathAi_backend.Data;
+using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using OpenAI.Chat;
 
 namespace mathAi_backend.Controllers;
 
 [Route("[controller]")]
-public class ApiController(IConfiguration config) : ControllerBase
+public class ApiController(IConfiguration config, IOpenAiRepository openAiRepository) : ControllerBase
 {
     private readonly DataContext _entityFramework = new(config);
     
     [HttpGet("status")]
-    public async Task<IActionResult> GetStatus()
+    public async Task<ActionResult<Dictionary<string, string>>> GetStatus()
     {
         var databaseConnectionStatus = await _entityFramework.Database.CanConnectAsync();
         
         try
         {
-            ChatClient client = new(model: "gpt-4o-mini", config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
-            ChatCompletion openAiConnectionStatus = client.CompleteChat("Write OK if connection was successful");
+            var client = openAiRepository.CreateChatClient();
+            ChatCompletion openAiConnectionStatus = await client.CompleteChatAsync("Write OK if connection was successful");
 
             return Ok(new Dictionary<string, string>
             {

@@ -16,19 +16,24 @@ public class User
     [Required]
     public bool IsTeacher { get; set; }
     
+    [Required]
     public bool FirstTimeSignIn { get; set; }
+    
+    public List<ExerciseSet> ExerciseSets { get; set; }
 
     public User()
     {
         Email ??= "";
         Name ??= "";
+        ExerciseSets = [];
     }
 
-    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true)
+    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true, List<ExerciseSet>? exerciseSets = null)
     {
         Email = email;
         Name = name;
         IsTeacher = isTeacher;
         FirstTimeSignIn = firstTimeSignIn;
+        ExerciseSets = exerciseSets ?? [];
     }
 }

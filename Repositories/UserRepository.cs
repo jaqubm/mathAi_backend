@@ -1,5 +1,6 @@
 using mathAi_backend.Data;
 using mathAi_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
@@ -24,20 +25,35 @@ public class UserRepository(IConfiguration config) : IUserRepository
             _entityFramework.Update(entity);
     }
 
-    public User GetUserByEmail(string email)
+    public User? GetUserByEmail(string email)
     {
-        var userDb = _entityFramework.User.FirstOrDefault(u => u.Email == email);
-        
-        if (userDb is null) throw new Exception("Failed to find user with email: " + email);
-        
-        return userDb;
+        return _entityFramework
+            .User
+            .FirstOrDefault(u => u.Email == email);
     }
 
     public bool UserAlreadyExist(string email)
     {
-        var userDb = _entityFramework.User
-            .FirstOrDefault(u => u.Email == email);
+        var userDb = _entityFramework
+            .Find<User>(email);
 
         return userDb is not null;
+    }
+
+    public int UserExerciseSetsCount(User user)
+    {
+        return _entityFramework
+            .ExerciseSet
+            .Count(e => e.UserId == user.Email);
+    }
+    
+    public List<ExerciseSet> GetUsersExerciseSetsByEmail(string email)
+    {
+        var userWithExerciseSets = _entityFramework
+            .User
+            .Include(u => u.ExerciseSets)
+            .FirstOrDefault(u => u.Email == email);
+        
+        return userWithExerciseSets?.ExerciseSets ?? [];
     }
 }
