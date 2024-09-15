@@ -49,6 +49,10 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
                 
                 exerciseSetName += $" {userRepository.UserExerciseSetsCount(userDb) + 1}";
             }
+            else
+            {
+                exerciseSetGenerator.UserId = null;
+            }
 
             var exerciseSet = new ExerciseSet()
             {
