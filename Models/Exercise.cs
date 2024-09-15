@@ -54,8 +54,6 @@ public class Exercise
                 jsonString = string.Join("\n", lines.Skip(1).Take(lines.Length - 2));
         }
         
-        Console.WriteLine(jsonString);
-        
         var exerciseData = JsonSerializer.Deserialize<Exercise>(jsonString);
 
         if (exerciseData != null)
