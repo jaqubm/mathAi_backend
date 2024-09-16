@@ -37,7 +37,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         var exerciseSetDb = exerciseSetRepository
             .GetExerciseSetWithExercisesById(exerciseSetId);
         
-        return exerciseSetDb is not null ? Ok(exerciseSetDb) : Problem("Failed to get exercise set.");
+        return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
     }
     
     [HttpPost("GenerateExerciseSet")]
