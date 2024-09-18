@@ -31,6 +31,15 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
                ExerciseAnswerFormat();
     }
     
+    [HttpGet("GetExerciseSet/{exerciseSetId}")]
+    public ActionResult<ExerciseSet> GetExerciseSet([FromRoute] string exerciseSetId)
+    {
+        var exerciseSetDb = exerciseSetRepository
+            .GetExerciseSetWithExercisesById(exerciseSetId);
+        
+        return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
+    }
+    
     [HttpPost("GenerateExerciseSet")]
     public async Task<ActionResult<ExerciseSet>> GenerateExerciseSet([FromBody] ExerciseSetGeneratorDto exerciseSetGenerator)
     {
@@ -79,7 +88,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
             
             exerciseSetRepository.AddEntity(exerciseSet);
             
-            return exerciseSetRepository.SaveChanges() ? Ok(exerciseSet) : Problem("Failed to create exercise set.");
+            return exerciseSetRepository.SaveChanges() ? Ok(exerciseSet.Id) : Problem("Failed to create exercise set.");
         }
         catch (Exception e)
         {
