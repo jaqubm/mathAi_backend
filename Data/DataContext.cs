@@ -16,9 +16,11 @@ public class DataContext(IConfiguration config) : DbContext
         
         // Setting up connection with DB
         optionsBuilder.UseSqlServer(config.GetConnectionString("AzureSQL"),
-            o => o.EnableRetryOnFailure());
-        
-        Database.SetCommandTimeout(60000);
+            o =>
+            {
+                o.EnableRetryOnFailure();
+                o.CommandTimeout(60000);
+            });
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
