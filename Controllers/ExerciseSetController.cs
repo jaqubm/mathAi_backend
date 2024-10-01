@@ -18,8 +18,12 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
     
     private static string ExerciseAnswerFormat()
     {
-        return "Odpowiedź odeślij w formacie JSON, tak jak w przykładzie, w formacie gotowym do wyświetlenia na stronie internetowej:\n" +
-               "{Content: string,\nFirstHint: string,\nSecondHint: string,\nThirdHint: string,\nSolution: string}";
+        return "Odpowiedź odeślij w formacie JSON, tak jak w przykładzie, w formacie gotowym do wyświetlenia na stronie internetowej:" +
+               "{Content: string," +
+               "FirstHint: string," +
+               "SecondHint: string," +
+               "ThirdHint: string," +
+               "Solution: string}";
     }
     
     private static string GenerateExerciseSetPrompt(ExerciseSetGeneratorDto exerciseSetGenerator)
