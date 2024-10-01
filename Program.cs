@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
     
     options.AddPolicy("ProdCors", policyBuilder =>
     {
-        policyBuilder.WithOrigins("https://mathai.jaqubm.dev/")
+        policyBuilder.WithOrigins("https://mathai.jaqubm.dev")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
