@@ -19,7 +19,7 @@ public class DataContext(IConfiguration config) : DbContext
             o =>
             {
                 o.EnableRetryOnFailure();
-                o.CommandTimeout(60000);
+                o.CommandTimeout(180000);
             });
     }
 
