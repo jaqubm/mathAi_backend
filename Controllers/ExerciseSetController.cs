@@ -173,7 +173,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         
         exerciseSetRepository.UpdateEntity(exerciseSet);
         
-        return exerciseSetRepository.SaveChanges() ? Ok(exerciseSet) : Problem("Failed to update exercise set.");
+        return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
     }
 
     [HttpPost("CopyExerciseSet/{exerciseSetId}")]
