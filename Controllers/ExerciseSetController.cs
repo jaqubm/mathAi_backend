@@ -197,7 +197,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
             SchoolType = exerciseSetDb.SchoolType,
             Grade = exerciseSetDb.Grade,
             Subject = exerciseSetDb.Subject,
-            User = userDb,
+            UserId = userDb.Email,
         };
 
         foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise
