@@ -10,7 +10,7 @@ public class ApiController(IConfiguration config, IOpenAiRepository openAiReposi
 {
     private readonly DataContext _entityFramework = new(config);
     
-    [HttpGet("status")]
+    [HttpGet("Status")]
     public async Task<ActionResult<Dictionary<string, string>>> GetStatus()
     {
         var databaseConnectionStatus = await _entityFramework.Database.CanConnectAsync();
