@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
@@ -9,12 +10,21 @@ namespace mathAi_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController(IUserRepository userRepository) : ControllerBase
+public partial class UserController(IUserRepository userRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<ExerciseSet, ExerciseSetDto>();
     })); 
+    
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex ExerciseSetNameRegex();
+    
+    private static int ExtractExerciseSetNumber(string exerciseSetName)
+    {
+        var match = ExerciseSetNameRegex().Match(exerciseSetName);
+        return match.Success ? int.Parse(match.Value) : int.MaxValue;
+    }
     
     [HttpPost("SignIn")]
     public async Task<IActionResult> SignIn([FromBody] string accessToken)
@@ -102,8 +112,11 @@ public class UserController(IUserRepository userRepository) : ControllerBase
 
         var exerciseSets = userRepository.GetUsersExerciseSetsByEmail(email);
         
-        var exerciseSetsDto = exerciseSets.Select(x => _mapper.Map<ExerciseSetDto>(x)).ToList();
+        var sortedExerciseSets = exerciseSets
+            .OrderBy(x => ExtractExerciseSetNumber(x.Name))
+            .Select(x => _mapper.Map<ExerciseSetDto>(x))
+            .ToList();
         
-        return Ok(exerciseSetsDto);
+        return Ok(sortedExerciseSets);
     }
 }
