@@ -27,14 +27,14 @@ public partial class UserController(IUserRepository userRepository) : Controller
     }
     
     [HttpPost("SignIn")]
-    public async Task<IActionResult> SignIn([FromBody] string accessToken)
+    public async Task<IActionResult> SignIn([FromBody] string idToken)
     {
-        if (string.IsNullOrEmpty(accessToken))
+        if (string.IsNullOrEmpty(idToken))
             return Unauthorized("Access token is required.");
 
         try
         {
-            var user = await AuthHelper.GetUserFromGoogleToken(accessToken);
+            var user = await AuthHelper.GetUserFromGoogleToken(idToken);
             
             if (userRepository.UserAlreadyExist(user.Email)) return Ok();
         
