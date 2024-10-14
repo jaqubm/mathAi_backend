@@ -14,6 +14,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<ExerciseSetGeneratorDto, ExerciseSet>();
+        c.CreateMap<ExerciseSet, ExerciseSet>();
     })); 
     
     private static string ExerciseAnswerFormat()
@@ -28,10 +29,11 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
     
     private static string GenerateExerciseSetPrompt(ExerciseSetGeneratorDto exerciseSetGenerator)
     {
-        return $"Wygeneruj zadanie, wraz z trzema podpowiedziami oraz odpowiedzią dla ucznia " +
+        return $"Wygeneruj zadanie z Matematyki, wraz z trzema podpowiedziami oraz odpowiedzią dla ucznia " +
                $"ze szkoły: {exerciseSetGenerator.SchoolType}, " +
                $"klasa: {exerciseSetGenerator.Grade}, " +
-               $"o tematyce: {exerciseSetGenerator.Subject}.\n" + 
+               $"o tematyce: {exerciseSetGenerator.Subject}. " + 
+               $"Zadanie powinno być ciekawe i rozbudowane.\n" + 
                ExerciseAnswerFormat();
     }
     
@@ -171,7 +173,9 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         if (!string.Equals(exerciseSetDb.UserId, userDb.Email))
             return Unauthorized("You don't have permission to update the exercise set.");
         
-        exerciseSetRepository.UpdateEntity(exerciseSet);
+        _mapper.Map(exerciseSet, exerciseSetDb);
+        
+        exerciseSetRepository.UpdateEntity(exerciseSetDb);
         
         return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
     }
