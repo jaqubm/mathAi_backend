@@ -37,4 +37,12 @@ public class ApiController(IConfiguration config, IOpenAiRepository openAiReposi
             });
         }
     }
+
+    [HttpGet("WakeUpDatabase")]
+    public async Task<ActionResult> GetWakeUpDatabase()
+    {
+        var databaseWakeUpConnectAsync = await _entityFramework.Database.CanConnectAsync();
+        
+        return Ok(databaseWakeUpConnectAsync);
+    }
 }
