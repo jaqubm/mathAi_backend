@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  Build:
     runs-on: windows-latest
 
     steps:
@@ -42,9 +42,9 @@ jobs:
           name: .net-app
           path: "${{env.DOTNET_ROOT}}/mathAi_backend"
 
-  deploy:
+  Deploy:
     runs-on: windows-latest
-    needs: build
+    needs: Build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
