@@ -7,8 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  build:
     runs-on: windows-latest
+    
+    name: Deploy
 
     steps:
       - uses: actions/checkout@v4
@@ -42,14 +44,16 @@ jobs:
           name: .net-app
           path: "${{env.DOTNET_ROOT}}/mathAi_backend"
 
-  Deploy:
+  deploy:
     runs-on: windows-latest
-    needs: Build
+    needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
+      
+    name: Deploy
 
     steps:
       - name: Download artifact from build job
