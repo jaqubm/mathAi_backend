@@ -31,17 +31,17 @@ public class Exercise
     public string ExerciseSetId { get; set; }
     
     [ForeignKey("ExerciseSetId")]
-    public ExerciseSet? ExerciseSet { get; set; }
+    public virtual ExerciseSet? ExerciseSet { get; set; }
 
     public Exercise()
     {
         Id = Guid.NewGuid().ToString();
-        Content = "";
-        FirstHint = "";
-        SecondHint = "";
-        ThirdHint = "";
-        Solution = "";
-        ExerciseSetId = "";
+        Content ??= "";
+        FirstHint ??= "";
+        SecondHint ??= "";
+        ThirdHint ??= "";
+        Solution ??= "";
+        ExerciseSetId ??= "";
     }
 
     public Exercise(string jsonString, string exerciseSetId)

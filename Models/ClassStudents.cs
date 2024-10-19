@@ -10,17 +10,19 @@ public class ClassStudents
     public string ClassId { get; set; }
     
     [ForeignKey("ClassId")]
-    public Class Class { get; set; }
+    public virtual Class? Class { get; set; }
 
     [Required]
     [MaxLength(255)]
     public string StudentId { get; set; }
     
     [ForeignKey("StudentId")]
-    public User Student { get; set; }
+    public virtual User? Student { get; set; }
 
     public ClassStudents()
     {
+        ClassId ??= "";
+        StudentId ??= "";
     }
 
     public ClassStudents(string classId, string studentId)
