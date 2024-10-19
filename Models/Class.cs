@@ -19,16 +19,23 @@ public class Class
     public string OwnerId { get; set; }
     
     [ForeignKey("OwnerId")]
-    public User Owner { get; set; }
-    
-    public List<ClassStudents> ClassStudents { get; set; }
+    public virtual User? Owner { get; set; }
 
-    public List<Assignment> Assignments { get; set; }
+    public virtual List<ClassStudents> ClassStudents { get; set; } = [];
+
+    public virtual List<Assignment> Assignments { get; set; } = [];
 
     public Class()
     {
         Id = Guid.NewGuid().ToString();
-        ClassStudents = [];
-        Assignments = [];
+        Name ??= "";
+        OwnerId ??= "";
+    }
+
+    public Class(string name, string ownerId)
+    {
+        Id = Guid.NewGuid().ToString();
+        Name = name;
+        OwnerId = ownerId;
     }
 }

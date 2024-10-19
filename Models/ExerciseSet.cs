@@ -12,36 +12,32 @@ public class ExerciseSet
     
     [Required]
     [MaxLength(255)]
-    public string Name { get; set; } = "";
+    public string Name { get; set; }
     
     [Required]
     [MaxLength(255)]
-    public string SchoolType { get; set; } = "";
+    public string SchoolType { get; set; }
     
     [Required]
     public int Grade { get; set; }
     
     [Required]
     [MaxLength(255)]
-    public string Subject { get; set; } = "";
-    
-    public List<Exercise> Exercises { get; set; }
+    public string Subject { get; set; }
+
+    public virtual List<Exercise> Exercises { get; set; } = [];
     
     [MaxLength(255)]
     public string? UserId { get; set; }
     
     [ForeignKey("UserId")]
-    public User? User { get; set; }
+    public virtual User? User { get; set; }
 
     public ExerciseSet()
     {
         Id = Guid.NewGuid().ToString();
-        Exercises = [];
-    }
-
-    public ExerciseSet(List<Exercise> exercises)
-    {
-        Id = Guid.NewGuid().ToString();
-        Exercises = exercises;
+        Name ??= "";
+        SchoolType ??= "";
+        Subject ??= "";
     }
 }

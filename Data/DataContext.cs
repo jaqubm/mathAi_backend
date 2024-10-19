@@ -70,7 +70,7 @@ public class DataContext(IConfiguration config) : DbContext
             .HasOne(cs => cs.Student)
             .WithMany(u => u.StudentClasses)
             .HasForeignKey(cs => cs.StudentId)
-            .OnDelete(DeleteBehavior.Restrict);  // Avoid cascading issues
+            .OnDelete(DeleteBehavior.Restrict);  // Avoid multiple cascade paths
 
         // Assignment
         modelBuilder.Entity<Assignment>()

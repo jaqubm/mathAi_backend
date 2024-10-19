@@ -18,34 +18,29 @@ public class User
     public bool IsTeacher { get; set; }
 
     [Required]
-    public bool FirstTimeSignIn { get; set; } = true;
+    public bool FirstTimeSignIn { get; set; }
 
     // One-to-many relationship with ExerciseSets
-    public List<ExerciseSet> ExerciseSets { get; set; }
+    public virtual List<ExerciseSet> ExerciseSets { get; set; } = [];
 
     // One-to-many relationship with Classes (for Teachers)
-    public List<Class> Classes { get; set; }
+    public virtual List<Class> Classes { get; set; } = [];
 
     // Many-to-many relationship with Classes (for Students)
-    public List<ClassStudents> StudentClasses { get; set; }
+    public virtual List<ClassStudents> StudentClasses { get; set; } = [];
 
     public User()
     {
         Email ??= "";
         Name ??= "";
-        ExerciseSets = [];
-        Classes = [];
-        StudentClasses = [];
+        FirstTimeSignIn = true;
     }
 
-    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true, List<ExerciseSet>? exerciseSets = null, List<Class>? classes = null, List<ClassStudents>? studentClasses = null)
+    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true)
     {
         Email = email;
         Name = name;
         IsTeacher = isTeacher;
         FirstTimeSignIn = firstTimeSignIn;
-        ExerciseSets = exerciseSets ?? [];
-        Classes = classes ?? [];
-        StudentClasses = studentClasses ?? [];
     }
 }

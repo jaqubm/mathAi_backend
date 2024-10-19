@@ -25,17 +25,32 @@ public class Assignment
     public string ClassId { get; set; }
     
     [ForeignKey("ClassId")]
-    public Class Class { get; set; }
+    public virtual Class? Class { get; set; }
 
     [Required]
     [MaxLength(255)]
     public string ExerciseSetId { get; set; }
     
     [ForeignKey("ExerciseSetId")]
-    public ExerciseSet ExerciseSet { get; set; }
+    public virtual ExerciseSet? ExerciseSet { get; set; }
 
     public Assignment()
     {
         Id = Guid.NewGuid().ToString();
+        Name ??= "";
+        StartDate = DateTime.Now;
+        DueDate = DateTime.Now;
+        ClassId ??= "";
+        ExerciseSetId ??= "";
+    }
+
+    public Assignment(string name, DateTime startDate, DateTime dueDate, string classId, string exerciseSetId)
+    {
+        Id = Guid.NewGuid().ToString();
+        Name = name;
+        StartDate = startDate;
+        DueDate = dueDate;
+        ClassId = classId;
+        ExerciseSetId = exerciseSetId;
     }
 }
