@@ -37,16 +37,16 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
                ExerciseAnswerFormat();
     }
     
-    [HttpGet("GetExerciseSet/{exerciseSetId}")]
+    [HttpGet("Get/{exerciseSetId}")]
     public ActionResult<ExerciseSet> GetExerciseSet([FromRoute] string exerciseSetId)
     {
         var exerciseSetDb = exerciseSetRepository
-            .GetExerciseSetWithExercisesById(exerciseSetId);
+            .GetExerciseSetById(exerciseSetId);
         
         return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
     }
     
-    [HttpPost("GenerateExerciseSet")]
+    [HttpPost("Generate")]
     public async Task<ActionResult<ExerciseSet>> GenerateExerciseSet([FromBody] ExerciseSetGeneratorDto exerciseSetGenerator)
     {
         try
@@ -109,7 +109,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         {
             var client = openAiRepository.CreateChatClient();
             
-            var exerciseSetDb = exerciseSetRepository.GetExerciseSetWithExercisesById(exerciseSetId);
+            var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
             
             if (exerciseSetDb is null)
                 return NotFound($"Could not find exercise set with id {exerciseSetId}");
@@ -151,13 +151,13 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         }
     }
 
-    [HttpPut("UpdateExerciseSet")]
+    [HttpPut("Update")]
     public ActionResult<ExerciseSet> UpdateExerciseSet([FromBody] ExerciseSet exerciseSet)
     {
         if (string.IsNullOrEmpty(exerciseSet.UserId))
             return Unauthorized("You don't have permission to update exercise set.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetWithExercisesById(exerciseSet.Id);
+        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSet.Id);
             
         if (exerciseSetDb is null)
             return NotFound($"Could not find exercise set with id {exerciseSet.Id}");
@@ -180,7 +180,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
     }
 
-    [HttpPost("CopyExerciseSet/{exerciseSetId}")]
+    [HttpPost("Copy/{exerciseSetId}")]
     public ActionResult<ExerciseSet> CopyExerciseSet([FromRoute] string exerciseSetId, [FromBody] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
@@ -188,7 +188,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         if (userDb is null)
             return Unauthorized("You don't have permission to copy exercise set.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetWithExercisesById(exerciseSetId);
+        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
             
         if (exerciseSetDb is null)
             return NotFound($"Could not find exercise set with id {exerciseSetId}");

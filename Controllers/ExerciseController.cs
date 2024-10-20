@@ -15,7 +15,7 @@ public class ExerciseController(IExerciseRepository exerciseRepository) : Contro
         c.CreateMap<ExerciseDto, Exercise>();
     })); 
     
-    [HttpGet("GetExercise/{exerciseId}")]
+    [HttpGet("Get/{exerciseId}")]
     public ActionResult<Exercise> GetExercise([FromRoute] string exerciseId)
     {
         var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);
@@ -25,7 +25,7 @@ public class ExerciseController(IExerciseRepository exerciseRepository) : Contro
         return NotFound("Exercise not found.");
     }
 
-    [HttpPut("UpdateExercise/{exerciseId}")]
+    [HttpPut("Update/{exerciseId}")]
     public ActionResult<Exercise> UpdateExercise([FromRoute] string exerciseId, [FromBody] ExerciseDto exercise)
     {
         var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);
@@ -37,7 +37,7 @@ public class ExerciseController(IExerciseRepository exerciseRepository) : Contro
         return exerciseRepository.SaveChanges() ? Ok(exerciseDb) : Problem("Failed to update exercise.");
     }
 
-    [HttpDelete("DeleteExercise/{exerciseId}")]
+    [HttpDelete("Delete/{exerciseId}")]
     public IActionResult DeleteExercise([FromRoute] string exerciseId)
     {
         var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);

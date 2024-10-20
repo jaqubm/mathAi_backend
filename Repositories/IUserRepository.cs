@@ -10,7 +10,7 @@ public interface IUserRepository
     public void UpdateEntity<T>(T entity);
 
     public User? GetUserByEmail(string email);
-    public bool UserAlreadyExist(string email);
+    public bool UserExist(string email);
 
     public int UserExerciseSetsCount(User user);
     public List<ExerciseSet> GetUsersExerciseSetsByEmail(string email);

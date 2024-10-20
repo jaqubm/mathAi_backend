@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
-public class ExerciseSetRepository(IConfiguration config) : IExerciseSetRepository
+public class ClassRepository(IConfiguration config) : IClassRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
@@ -31,13 +31,12 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
             _entityFramework.Remove(entity);
     }
 
-    public ExerciseSet? GetExerciseSetById(string exerciseSetId)
+    public Class? GetClassById(string id)
     {
-        var exerciseSetDb = _entityFramework
-            .ExerciseSet
-            .Include(es => es.Exercises)
-            .FirstOrDefault(es => es.Id == exerciseSetId);
-        
-        return exerciseSetDb;
+        return _entityFramework
+            .Class
+            .Include(c => c.ClassStudents)
+            .Include(c => c.Assignments)
+            .FirstOrDefault(c => c.Id == id);
     }
 }
