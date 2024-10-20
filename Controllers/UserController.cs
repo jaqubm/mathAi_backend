@@ -25,6 +25,12 @@ public partial class UserController(IUserRepository userRepository) : Controller
         var match = ExerciseSetNameRegex().Match(exerciseSetName);
         return match.Success ? int.Parse(match.Value) : int.MaxValue;
     }
+
+    [HttpGet("Exist/{email}")]
+    public ActionResult<bool> UserExists([FromRoute] string email)
+    {
+        return Ok(userRepository.UserExist(email));
+    }
     
     [HttpPost("SignIn")]
     public async Task<IActionResult> SignIn([FromBody] string idToken)
@@ -36,11 +42,11 @@ public partial class UserController(IUserRepository userRepository) : Controller
         {
             var user = await AuthHelper.GetUserFromGoogleToken(idToken);
             
-            if (userRepository.UserAlreadyExist(user.Email)) return Ok();
+            if (userRepository.UserExist(user.Email)) return Ok();
         
             userRepository.AddEntity(user);
             
-            return userRepository.SaveChanges() ? Ok() : Unauthorized("Failed to add user to database.");
+            return userRepository.SaveChanges() ? Ok() : Problem("Failed to add user to database.");
         }
         catch (Exception e)
         {

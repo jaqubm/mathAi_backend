@@ -41,6 +41,9 @@ builder.Services.AddScoped<IOpenAiRepository, OpenAiRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseSetRepository, ExerciseSetRepository>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
+builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
 
 var app = builder.Build();
 

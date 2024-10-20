@@ -2,7 +2,7 @@ using mathAi_backend.Models;
 
 namespace mathAi_backend.Repositories;
 
-public interface IExerciseSetRepository
+public interface IClassRepository
 {
     public bool SaveChanges();
 
@@ -10,5 +10,5 @@ public interface IExerciseSetRepository
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
-    public ExerciseSet? GetExerciseSetById(string exerciseSetId);
+    public Class? GetClassById(string id);
 }

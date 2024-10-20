@@ -1,10 +1,8 @@
 using mathAi_backend.Data;
-using mathAi_backend.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
-public class ExerciseSetRepository(IConfiguration config) : IExerciseSetRepository
+public class ClassStudentRepository(IConfiguration config) : IClassStudentRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
@@ -29,15 +27,5 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
     {
         if (entity is not null)
             _entityFramework.Remove(entity);
-    }
-
-    public ExerciseSet? GetExerciseSetById(string exerciseSetId)
-    {
-        var exerciseSetDb = _entityFramework
-            .ExerciseSet
-            .Include(es => es.Exercises)
-            .FirstOrDefault(es => es.Id == exerciseSetId);
-        
-        return exerciseSetDb;
     }
 }

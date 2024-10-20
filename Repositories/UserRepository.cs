@@ -32,7 +32,7 @@ public class UserRepository(IConfiguration config) : IUserRepository
             .FirstOrDefault(u => u.Email == email);
     }
 
-    public bool UserAlreadyExist(string email)
+    public bool UserExist(string email)
     {
         var userDb = _entityFramework
             .Find<User>(email);
