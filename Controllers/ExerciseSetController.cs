@@ -37,15 +37,6 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
                ExerciseAnswerFormat();
     }
     
-    [HttpGet("Get/{exerciseSetId}")]
-    public ActionResult<ExerciseSet> GetExerciseSet([FromRoute] string exerciseSetId)
-    {
-        var exerciseSetDb = exerciseSetRepository
-            .GetExerciseSetById(exerciseSetId);
-        
-        return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
-    }
-    
     [HttpPost("Generate")]
     public async Task<ActionResult<ExerciseSet>> GenerateExerciseSet([FromBody] ExerciseSetGeneratorDto exerciseSetGenerator)
     {
@@ -101,6 +92,86 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
             return Problem(e.Message, statusCode: 500);
         }
     }
+    
+    [HttpPost("Copy/{exerciseSetId}")]
+    public ActionResult<ExerciseSet> CopyExerciseSet([FromRoute] string exerciseSetId, [FromBody] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+                
+        if (userDb is null)
+            return Unauthorized("You don't have permission to copy exercise set.");
+        
+        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
+            
+        if (exerciseSetDb is null)
+            return NotFound($"Could not find exercise set with id {exerciseSetId}");
+        
+        var exerciseSetName = $"Zestaw Zadań {userRepository.UserExerciseSetsCount(userDb) + 1}";
+
+        var copiedExerciseSet = new ExerciseSet
+        {
+            Name = exerciseSetName,
+            SchoolType = exerciseSetDb.SchoolType,
+            Grade = exerciseSetDb.Grade,
+            Subject = exerciseSetDb.Subject,
+            UserId = userDb.Email,
+        };
+
+        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise
+                 {
+                     Content = exercise.Content,
+                     FirstHint = exercise.FirstHint,
+                     SecondHint = exercise.SecondHint,
+                     ThirdHint = exercise.ThirdHint,
+                     Solution = exercise.Solution,
+                     ExerciseSetId = copiedExerciseSet.Id,
+                 }))
+        {
+            copiedExerciseSet.Exercises.Add(copiedExercise);
+        }
+        
+        exerciseSetRepository.AddEntity(copiedExerciseSet);
+            
+        return exerciseSetRepository.SaveChanges() ? Ok(copiedExerciseSet.Id) : Problem("Failed to copy exercise set.");
+    }
+    
+    [HttpGet("Get/{exerciseSetId}")]
+    public ActionResult<ExerciseSet> GetExerciseSet([FromRoute] string exerciseSetId)
+    {
+        var exerciseSetDb = exerciseSetRepository
+            .GetExerciseSetById(exerciseSetId);
+        
+        return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
+    }
+    
+    [HttpPut("Update")]
+    public ActionResult<ExerciseSet> UpdateExerciseSet([FromBody] ExerciseSet exerciseSet)
+    {
+        if (string.IsNullOrEmpty(exerciseSet.UserId))
+            return Unauthorized("You don't have permission to update exercise set.");
+        
+        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSet.Id);
+            
+        if (exerciseSetDb is null)
+            return NotFound($"Could not find exercise set with id {exerciseSet.Id}");
+        
+        var userDb = userRepository.GetUserByEmail(exerciseSet.UserId);
+        
+        if (userDb is null)
+            return Unauthorized("You don't have permission to update the exercise set.");
+        
+        if (!userDb.IsTeacher)
+            return Unauthorized("You don't have permission to update the exercise set.");
+        
+        if (!string.Equals(exerciseSetDb.UserId, userDb.Email))
+            return Unauthorized("You don't have permission to update the exercise set.");
+        
+        _mapper.Map(exerciseSet, exerciseSetDb);
+        
+        exerciseSetRepository.UpdateEntity(exerciseSetDb);
+        
+        return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
+    }
 
     [HttpPut("GenerateAdditionalExercise/{exerciseSetId}")]
     public async Task<ActionResult<ExerciseSet>> GenerateAdditionalExercise([FromRoute] string exerciseSetId, [FromBody] string email)
@@ -149,76 +220,5 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
         {
             return Problem(e.Message, statusCode: 500);
         }
-    }
-
-    [HttpPut("Update")]
-    public ActionResult<ExerciseSet> UpdateExerciseSet([FromBody] ExerciseSet exerciseSet)
-    {
-        if (string.IsNullOrEmpty(exerciseSet.UserId))
-            return Unauthorized("You don't have permission to update exercise set.");
-        
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSet.Id);
-            
-        if (exerciseSetDb is null)
-            return NotFound($"Could not find exercise set with id {exerciseSet.Id}");
-        
-        var userDb = userRepository.GetUserByEmail(exerciseSet.UserId);
-        
-        if (userDb is null)
-            return Unauthorized("You don't have permission to update the exercise set.");
-        
-        if (!userDb.IsTeacher)
-            return Unauthorized("You don't have permission to update the exercise set.");
-        
-        if (!string.Equals(exerciseSetDb.UserId, userDb.Email))
-            return Unauthorized("You don't have permission to update the exercise set.");
-        
-        _mapper.Map(exerciseSet, exerciseSetDb);
-        
-        exerciseSetRepository.UpdateEntity(exerciseSetDb);
-        
-        return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
-    }
-
-    [HttpPost("Copy/{exerciseSetId}")]
-    public ActionResult<ExerciseSet> CopyExerciseSet([FromRoute] string exerciseSetId, [FromBody] string email)
-    {
-        var userDb = userRepository.GetUserByEmail(email);
-                
-        if (userDb is null)
-            return Unauthorized("You don't have permission to copy exercise set.");
-        
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
-            
-        if (exerciseSetDb is null)
-            return NotFound($"Could not find exercise set with id {exerciseSetId}");
-        
-        var exerciseSetName = $"Zestaw Zadań {userRepository.UserExerciseSetsCount(userDb) + 1}";
-
-        var copiedExerciseSet = new ExerciseSet
-        {
-            Name = exerciseSetName,
-            SchoolType = exerciseSetDb.SchoolType,
-            Grade = exerciseSetDb.Grade,
-            Subject = exerciseSetDb.Subject,
-            UserId = userDb.Email,
-        };
-
-        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise
-                 {
-                     Content = exercise.Content,
-                     FirstHint = exercise.FirstHint,
-                     SecondHint = exercise.SecondHint,
-                     ThirdHint = exercise.ThirdHint,
-                     Solution = exercise.Solution,
-                     ExerciseSetId = copiedExerciseSet.Id,
-                 }))
-        {
-            copiedExerciseSet.Exercises.Add(copiedExercise);
-        }
-        
-        exerciseSetRepository.AddEntity(copiedExerciseSet);
-            
-        return exerciseSetRepository.SaveChanges() ? Ok(copiedExerciseSet.Id) : Problem("Failed to copy exercise set.");
     }
 }

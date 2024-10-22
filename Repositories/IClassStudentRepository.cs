@@ -7,4 +7,6 @@ public interface IClassStudentRepository
     public void AddEntity<T>(T entity);
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
+    
+    public List<string> GetClassIdsByStudentId(string studentId);
 }
