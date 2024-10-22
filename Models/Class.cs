@@ -21,9 +21,9 @@ public class Class
     [ForeignKey("OwnerId")]
     public virtual User? Owner { get; set; }
 
-    public virtual List<ClassStudents> ClassStudents { get; set; } = [];
+    public virtual List<ClassStudents?> ClassStudents { get; set; } = [];
 
-    public virtual List<Assignment> Assignments { get; set; } = [];
+    public virtual List<Assignment?> Assignments { get; set; } = [];
 
     public Class()
     {

@@ -28,4 +28,14 @@ public class ClassStudentRepository(IConfiguration config) : IClassStudentReposi
         if (entity is not null)
             _entityFramework.Remove(entity);
     }
+
+    public List<string> GetClassIdsByStudentId(string studentId)
+    {
+        var classIdsList = _entityFramework
+            .ClassStudents
+            .Where(cs => cs.StudentId == studentId).Select(cs => cs.ClassId)
+            .ToList();
+
+        return classIdsList;
+    }
 }

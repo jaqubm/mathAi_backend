@@ -39,4 +39,12 @@ public class ClassRepository(IConfiguration config) : IClassRepository
             .Include(c => c.Assignments)
             .FirstOrDefault(c => c.Id == id);
     }
+
+    public List<Class> GetClassesByOwnerId(string id)
+    {
+        return _entityFramework.Class
+            .Include(c => c.ClassStudents)
+            .Where(c => c.OwnerId == id)
+            .ToList();
+    }
 }

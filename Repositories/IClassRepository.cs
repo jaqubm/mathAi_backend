@@ -11,4 +11,5 @@ public interface IClassRepository
     public void DeleteEntity<T>(T entity);
     
     public Class? GetClassById(string id);
+    public List<Class> GetClassesByOwnerId(string id);
 }

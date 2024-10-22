@@ -10,11 +10,12 @@ namespace mathAi_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public partial class UserController(IUserRepository userRepository) : ControllerBase
+public partial class UserController(IUserRepository userRepository, IClassRepository classRepository, IClassStudentRepository classStudentRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<ExerciseSet, ExerciseSetDto>();
+        c.CreateMap<Class, ClassDto>();
     })); 
     
     [GeneratedRegex(@"\d+")]
@@ -24,12 +25,6 @@ public partial class UserController(IUserRepository userRepository) : Controller
     {
         var match = ExerciseSetNameRegex().Match(exerciseSetName);
         return match.Success ? int.Parse(match.Value) : int.MaxValue;
-    }
-
-    [HttpGet("Exist/{email}")]
-    public ActionResult<bool> UserExists([FromRoute] string email)
-    {
-        return Ok(userRepository.UserExist(email));
     }
     
     [HttpPost("SignIn")]
@@ -52,6 +47,12 @@ public partial class UserController(IUserRepository userRepository) : Controller
         {
             return Unauthorized(e.Message);
         }
+    }
+    
+    [HttpGet("Exist/{email}")]
+    public ActionResult<bool> UserExists([FromRoute] string email)
+    {
+        return Ok(userRepository.UserExist(email));
     }
 
     [HttpGet("FirstTimeSignIn/{email}")]
@@ -109,7 +110,7 @@ public partial class UserController(IUserRepository userRepository) : Controller
     }
 
     [HttpGet("GetExerciseSets/{email}")]
-    public ActionResult<List<ExerciseSet>> GetExerciseSets([FromRoute] string email)
+    public ActionResult<List<ExerciseSetDto>> GetExerciseSets([FromRoute] string email)
     {
         var userDb = userRepository.GetUserByEmail(email);
         
@@ -124,5 +125,40 @@ public partial class UserController(IUserRepository userRepository) : Controller
             .ToList();
         
         return Ok(sortedExerciseSets);
+    }
+    
+    [HttpGet("GetClasses/{email}")]
+    public ActionResult<List<Class>> GetClasses([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null) return NotFound("User not found.");
+        if (userDb.IsTeacher) return Unauthorized("You need to be Student to be a part of class.");
+
+        var userClassesIds = classStudentRepository.GetClassIdsByStudentId(userDb.Email);
+
+        var userClasses = new List<Class>();
+        
+        userClassesIds.ForEach(x =>
+        {
+            var classDb = classRepository.GetClassById(x);
+            if (classDb is null) return;
+            userClasses.Add(classDb);
+        });
+        
+        return Ok(userClasses);
+    }
+
+    [HttpGet("GetOwnedClasses/{email}")]
+    public ActionResult<List<Class>> GetOwnedClasses([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null) return NotFound("User not found.");
+
+        var userClasses = classRepository
+            .GetClassesByOwnerId(userDb.Email);
+        
+        return Ok(userClasses);
     }
 }
