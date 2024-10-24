@@ -12,4 +12,5 @@ public interface IClassRepository
     
     public Class? GetClassById(string id);
     public List<Class> GetClassesByOwnerId(string id);
+    public List<Class> GetClassesByStudentId(string id);
 }
