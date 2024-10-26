@@ -10,7 +10,7 @@ namespace mathAi_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public partial class UserController(IUserRepository userRepository, IClassRepository classRepository, IClassStudentRepository classStudentRepository) : ControllerBase
+public partial class UserController(IUserRepository userRepository, IClassRepository classRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
@@ -133,32 +133,13 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
         var userDb = userRepository.GetUserByEmail(email);
         
         if (userDb is null) return NotFound("User not found.");
-        if (userDb.IsTeacher) return Unauthorized("You need to be Student to be a part of class.");
 
-        var userClassesIds = classStudentRepository.GetClassIdsByStudentId(userDb.Email);
-
-        var userClasses = new List<Class>();
-        
-        userClassesIds.ForEach(x =>
+        var userClasses = userDb.IsTeacher switch
         {
-            var classDb = classRepository.GetClassById(x);
-            if (classDb is null) return;
-            userClasses.Add(classDb);
-        });
-        
-        return Ok(userClasses);
-    }
+            true => classRepository.GetClassesByOwnerId(userDb.Email),
+            false => classRepository.GetClassesByStudentId(userDb.Email)
+        };
 
-    [HttpGet("GetOwnedClasses/{email}")]
-    public ActionResult<List<Class>> GetOwnedClasses([FromRoute] string email)
-    {
-        var userDb = userRepository.GetUserByEmail(email);
-        
-        if (userDb is null) return NotFound("User not found.");
-
-        var userClasses = classRepository
-            .GetClassesByOwnerId(userDb.Email);
-        
         return Ok(userClasses);
     }
 }

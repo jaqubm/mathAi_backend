@@ -11,9 +11,9 @@ CREATE TABLE mathAi.[User]
 
 CREATE TABLE mathAi.[ExerciseSet]
 (
-    Id NVARCHAR(255) NOT NULL PRIMARY KEY,     -- Unique identifier for the exercise set
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,     -- Unique identifier for the exercise set
     Name NVARCHAR(255) NOT NULL,               -- Name of the exercise set
-    SchoolType NVARCHAR(255) NOT NULL,         -- Type of school (e.g., "Primary", "High School")
+    SchoolType NVARCHAR(50) NOT NULL,         -- Type of school (e.g., "Primary", "High School")
     Grade INT NOT NULL,                        -- Grade level associated with the exercise set
     Subject NVARCHAR(255) NOT NULL,            -- Subject of the exercise set (e.g., "Math")
     UserId NVARCHAR(255),                      -- Reference to the teacher (User) who created the set
@@ -25,13 +25,13 @@ CREATE TABLE mathAi.[ExerciseSet]
 
 CREATE TABLE mathAi.[Exercise]
 (
-    Id NVARCHAR(255) NOT NULL PRIMARY KEY,     -- Unique identifier for the exercise
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,     -- Unique identifier for the exercise
     Content NVARCHAR(MAX) NOT NULL,            -- The content or description of the exercise
     FirstHint NVARCHAR(MAX) NOT NULL,          -- First hint for the exercise
     SecondHint NVARCHAR(MAX) NOT NULL,         -- Second hint for the exercise
     ThirdHint NVARCHAR(MAX) NOT NULL,          -- Third hint for the exercise
     Solution NVARCHAR(MAX) NOT NULL,           -- Solution to the exercise
-    ExerciseSetId NVARCHAR(255) NOT NULL,      -- Foreign key linking the exercise to an exercise set
+    ExerciseSetId NVARCHAR(50) NOT NULL,      -- Foreign key linking the exercise to an exercise set
 
     CONSTRAINT FK_ExerciseSet_Exercise FOREIGN KEY (ExerciseSetId)
         REFERENCES mathAi.[ExerciseSet](Id)
@@ -40,7 +40,7 @@ CREATE TABLE mathAi.[Exercise]
 
 CREATE TABLE mathAi.[Class]
 (
-    Id NVARCHAR(255) NOT NULL PRIMARY KEY,     -- Unique identifier for the class
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,     -- Unique identifier for the class
     Name NVARCHAR(255) NOT NULL,               -- Name of the class
     OwnerId NVARCHAR(255) NOT NULL,            -- Foreign key linking the class to the teacher (User)
 
@@ -52,7 +52,7 @@ CREATE TABLE mathAi.[Class]
 CREATE TABLE mathAi.[ClassStudents]
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,          -- Surrogate key as primary key
-    ClassId NVARCHAR(255) NOT NULL,            -- Foreign key linking the class
+    ClassId NVARCHAR(50) NOT NULL,            -- Foreign key linking the class
     StudentId NVARCHAR(255) NOT NULL,          -- Foreign key linking the student to a user (User)
 
     CONSTRAINT FK_Class_ClassStudents FOREIGN KEY (ClassId)
@@ -69,12 +69,12 @@ CREATE TABLE mathAi.[ClassStudents]
 
 CREATE TABLE mathAi.[Assignment]
 (
-    Id NVARCHAR(255) NOT NULL PRIMARY KEY,     -- Unique identifier for the assignment
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,     -- Unique identifier for the assignment
     Name NVARCHAR(255) NOT NULL,               -- Name of the assignment
     StartDate DATE NOT NULL,                   -- Start date of the assignment
     DueDate DATE NOT NULL,                     -- Due date of the assignment
-    ClassId NVARCHAR(255) NOT NULL,            -- Foreign key linking the assignment to a class
-    ExerciseSetId NVARCHAR(255) NOT NULL,      -- Foreign key linking the assignment to an exercise set
+    ClassId NVARCHAR(50) NOT NULL,            -- Foreign key linking the assignment to a class
+    ExerciseSetId NVARCHAR(50) NOT NULL,      -- Foreign key linking the assignment to an exercise set
 
     CONSTRAINT FK_Class_Assignment FOREIGN KEY (ClassId)
         REFERENCES mathAi.[Class](Id)
@@ -86,6 +86,48 @@ CREATE TABLE mathAi.[Assignment]
 );
 
 
+-- Table to track assignment submissions by students
+CREATE TABLE mathAi.[AssignmentSubmissions]
+(
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,         -- Unique identifier for each submission
+    AssignmentId NVARCHAR(50) NOT NULL,           -- Foreign key linking to the Assignment table
+    StudentId NVARCHAR(255) NOT NULL,             -- Foreign key linking to the User table (for students only)
+    SubmissionDate DATETIME,                      -- Timestamp for when the assignment was submitted
+    Completed BIT NOT NULL DEFAULT 0,             -- Status flag to check if the assignment is completed
+
+    CONSTRAINT FK_Assignment_Submissions FOREIGN KEY (AssignmentId)
+        REFERENCES mathAi.[Assignment](Id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_User_Submissions FOREIGN KEY (StudentId)
+        REFERENCES mathAi.[User](Email)
+        ON DELETE NO ACTION  -- Prevents cascading delete to avoid conflict
+);
+
+
+-- Table to store each student's answers, grades, and feedback for each exercise
+CREATE TABLE mathAi.[ExerciseAnswers]
+(
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,          -- Unique identifier for each answer entry
+    AssignmentSubmissionId NVARCHAR(50) NOT NULL,  -- Foreign key linking to the AssignmentSubmissions table
+    ExerciseId NVARCHAR(50) NOT NULL,              -- Foreign key linking to the Exercise table
+    StudentAnswer NVARCHAR(MAX),                   -- The student's answer to the exercise
+    Grade INT,                                     -- Grade given to the student's answer for the exercise
+    Feedback NVARCHAR(MAX),                        -- Optional feedback from the teacher
+    AnsweredDate DATETIME,                         -- Timestamp of when the student submitted their answer
+
+    CONSTRAINT FK_Submission_ExerciseAnswers FOREIGN KEY (AssignmentSubmissionId)
+        REFERENCES mathAi.[AssignmentSubmissions](Id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_Exercise_ExerciseAnswers FOREIGN KEY (ExerciseId)
+        REFERENCES mathAi.[Exercise](Id)
+        ON DELETE NO ACTION  -- Prevents cascading delete to avoid conflict
+);
+
+
+DROP TABLE mathAi.ExerciseAnswers;
+DROP TABLE mathAi.AssignmentSubmissions;
 DROP TABLE mathAi.[Assignment];
 DROP TABLE mathAi.[ClassStudents];
 DROP TABLE mathAi.[Class];

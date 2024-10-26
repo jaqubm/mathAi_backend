@@ -47,4 +47,23 @@ public class ClassRepository(IConfiguration config) : IClassRepository
             .Where(c => c.OwnerId == id)
             .ToList();
     }
+
+    public List<Class> GetClassesByStudentId(string id)
+    {
+        var classIdsList = _entityFramework
+            .ClassStudents
+            .Where(cs => cs.StudentId == id).Select(cs => cs.ClassId)
+            .ToList();
+        
+        var studentClasses = new List<Class>();
+        
+        classIdsList.ForEach(x =>
+        {
+            var classDb = GetClassById(x);
+            if (classDb is null) return;
+            studentClasses.Add(classDb);
+        });
+
+        return studentClasses;
+    }
 }

@@ -8,7 +8,7 @@ public class Exercise
 {
     [Key]
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string Id { get; set; }
     
     [Required]
@@ -27,11 +27,14 @@ public class Exercise
     public string Solution { get; set; }
     
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string ExerciseSetId { get; set; }
     
     [ForeignKey("ExerciseSetId")]
     public virtual ExerciseSet? ExerciseSet { get; set; }
+    
+    public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
+
 
     public Exercise()
     {

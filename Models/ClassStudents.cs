@@ -6,7 +6,7 @@ namespace mathAi_backend.Models;
 public class ClassStudents
 {
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string ClassId { get; set; }
     
     [ForeignKey("ClassId")]

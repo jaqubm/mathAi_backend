@@ -54,6 +54,6 @@ public class UserRepository(IConfiguration config) : IUserRepository
             .Include(u => u.ExerciseSets)
             .FirstOrDefault(u => u.Email == email);
         
-        return userWithExerciseSets?.ExerciseSets ?? [];
+        return userWithExerciseSets?.ExerciseSets as List<ExerciseSet> ?? [];
     }
 }
