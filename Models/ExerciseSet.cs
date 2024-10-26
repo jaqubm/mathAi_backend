@@ -7,7 +7,7 @@ public class ExerciseSet
 {
     [Key]
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string Id { get; set; }
     
     [Required]
@@ -15,7 +15,7 @@ public class ExerciseSet
     public string Name { get; set; }
     
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string SchoolType { get; set; }
     
     [Required]
@@ -25,7 +25,7 @@ public class ExerciseSet
     [MaxLength(255)]
     public string Subject { get; set; }
 
-    public virtual List<Exercise> Exercises { get; set; } = [];
+    public virtual ICollection<Exercise> Exercises { get; set; } = [];
     
     [MaxLength(255)]
     public string? UserId { get; set; }

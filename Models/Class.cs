@@ -7,7 +7,7 @@ public class Class
 {
     [Key]
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string Id { get; set; }
     
     [Required]

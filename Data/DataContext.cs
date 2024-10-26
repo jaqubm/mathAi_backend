@@ -11,6 +11,9 @@ public class DataContext(IConfiguration config) : DbContext
     public virtual DbSet<Class> Class { get; set; }
     public virtual DbSet<ClassStudents> ClassStudents { get; set; }
     public virtual DbSet<Assignment> Assignment { get; set; }
+    public virtual DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+    public virtual DbSet<ExerciseAnswers> ExerciseAnswers { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -87,5 +90,36 @@ public class DataContext(IConfiguration config) : DbContext
             .WithMany()
             .HasForeignKey(a => a.ExerciseSetId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // AssignmentSubmission and ExerciseAnswer
+        modelBuilder.Entity<AssignmentSubmission>()
+            .HasKey(sub => sub.Id);
+
+        modelBuilder.Entity<AssignmentSubmission>()
+            .HasOne(sub => sub.Assignment)
+            .WithMany(a => a.Submissions)
+            .HasForeignKey(sub => sub.AssignmentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<AssignmentSubmission>()
+            .HasOne(sub => sub.Student)
+            .WithMany(u => u.AssignmentSubmissions)
+            .HasForeignKey(sub => sub.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);  // Prevent multiple cascade paths
+
+        modelBuilder.Entity<ExerciseAnswers>()
+            .HasKey(ea => ea.Id);
+
+        modelBuilder.Entity<ExerciseAnswers>()
+            .HasOne(ea => ea.AssignmentSubmission)
+            .WithMany(sub => sub.ExerciseAnswers)
+            .HasForeignKey(ea => ea.AssignmentSubmissionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExerciseAnswers>()
+            .HasOne(ea => ea.Exercise)
+            .WithMany(e => e.ExerciseAnswers)
+            .HasForeignKey(ea => ea.ExerciseId)
+            .OnDelete(DeleteBehavior.Restrict);  // Prevent multiple cascade paths
     }
 }

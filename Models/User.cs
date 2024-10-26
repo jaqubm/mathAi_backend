@@ -21,13 +21,17 @@ public class User
     public bool FirstTimeSignIn { get; set; }
 
     // One-to-many relationship with ExerciseSets
-    public virtual List<ExerciseSet> ExerciseSets { get; set; } = [];
+    public virtual ICollection<ExerciseSet> ExerciseSets { get; set; } = [];
 
     // One-to-many relationship with Classes (for Teachers)
-    public virtual List<Class> Classes { get; set; } = [];
+    public virtual ICollection<Class> Classes { get; set; } = [];
 
     // Many-to-many relationship with Classes (for Students)
-    public virtual List<ClassStudents> StudentClasses { get; set; } = [];
+    public virtual ICollection<ClassStudents> StudentClasses { get; set; } = [];
+
+    // Many-to-many relationship with Assignments (for Students)
+    public virtual ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; } = [];
+
 
     public User()
     {

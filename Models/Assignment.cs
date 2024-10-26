@@ -7,7 +7,7 @@ public class Assignment
 {
     [Key]
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string Id { get; set; }
 
     [Required]
@@ -21,18 +21,21 @@ public class Assignment
     public DateTime DueDate { get; set; }
 
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string ClassId { get; set; }
     
     [ForeignKey("ClassId")]
     public virtual Class? Class { get; set; }
 
     [Required]
-    [MaxLength(255)]
+    [MaxLength(50)]
     public string ExerciseSetId { get; set; }
     
     [ForeignKey("ExerciseSetId")]
     public virtual ExerciseSet? ExerciseSet { get; set; }
+    
+    public virtual ICollection<AssignmentSubmission> Submissions { get; set; } = [];
+
 
     public Assignment()
     {
