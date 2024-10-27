@@ -126,8 +126,8 @@ CREATE TABLE mathAi.[ExerciseAnswers]
 );
 
 
-DROP TABLE mathAi.ExerciseAnswers;
-DROP TABLE mathAi.AssignmentSubmissions;
+DROP TABLE mathAi.[ExerciseAnswers];
+DROP TABLE mathAi.[AssignmentSubmissions];
 DROP TABLE mathAi.[Assignment];
 DROP TABLE mathAi.[ClassStudents];
 DROP TABLE mathAi.[Class];
