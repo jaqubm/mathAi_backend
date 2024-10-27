@@ -23,10 +23,10 @@ public class AssignmentSubmission
     public bool Completed { get; set; }
 
     [ForeignKey("AssignmentId")]
-    public virtual Assignment Assignment { get; set; }
+    public virtual Assignment? Assignment { get; set; }
 
     [ForeignKey("StudentId")]
-    public virtual User Student { get; set; }
+    public virtual User? Student { get; set; }
 
     public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
 
