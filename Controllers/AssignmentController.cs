@@ -28,6 +28,13 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
         
         var assignment = _mapper.Map<AssignmentDto, Assignment>(assignmentDto);
         
+        classDb.ClassStudents.ForEach(cs =>
+        {
+            assignment.Submissions.Add(new AssignmentSubmission(assignment.Id, cs.StudentId));
+        });
+
+        Console.WriteLine(assignment.Submissions.Count);
+        
         assignmentRepository.AddEntity(assignment);
         
         return assignmentRepository.SaveChanges() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");

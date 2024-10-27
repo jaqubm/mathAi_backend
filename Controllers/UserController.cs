@@ -10,7 +10,7 @@ namespace mathAi_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public partial class UserController(IUserRepository userRepository, IClassRepository classRepository) : ControllerBase
+public partial class UserController(IUserRepository userRepository, IClassRepository classRepository, IAssignmentRepository assignmentRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
@@ -132,7 +132,8 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
     {
         var userDb = userRepository.GetUserByEmail(email);
         
-        if (userDb is null) return NotFound("User not found.");
+        if (userDb is null) 
+            return NotFound("User not found.");
 
         var userClasses = userDb.IsTeacher switch
         {
@@ -141,5 +142,22 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
         };
 
         return Ok(userClasses);
+    }
+
+    [HttpGet("GetAssignmentSubmissions/{email}")]
+    public ActionResult<List<AssignmentSubmission>> GetAssignmentSubmissions([FromRoute] string email)
+    {
+        var userDb = userRepository.GetUserByEmail(email);
+        
+        if (userDb is null)
+            return NotFound("User not found.");
+        
+        var assignmentSubmissions = userRepository.GetAssignmentSubmissionsByEmail(email);
+        
+        assignmentSubmissions.ForEach(sub => sub.Assignment = assignmentRepository.GetAssignmentById(sub.AssignmentId) ?? throw new InvalidOperationException());
+        
+        var sortedAssignmentSubmissions = assignmentSubmissions.OrderBy(sub => sub.Assignment.DueDate).ToList();
+        
+        return Ok(sortedAssignmentSubmissions);
     }
 }

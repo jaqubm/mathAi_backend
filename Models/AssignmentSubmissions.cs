@@ -20,7 +20,7 @@ public class AssignmentSubmission
     public DateTime? SubmissionDate { get; set; }
 
     [Required]
-    public bool Completed { get; set; } = false;
+    public bool Completed { get; set; }
 
     [ForeignKey("AssignmentId")]
     public virtual Assignment Assignment { get; set; }
@@ -29,4 +29,11 @@ public class AssignmentSubmission
     public virtual User Student { get; set; }
 
     public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
+
+    public AssignmentSubmission(string assignmentId, string studentId)
+    {
+        Id = Guid.NewGuid().ToString();
+        AssignmentId = assignmentId;
+        StudentId = studentId;
+    }
 }
