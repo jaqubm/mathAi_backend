@@ -91,7 +91,7 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
         if (classDb.OwnerId.Equals(userDb.Email)) return Unauthorized("Only Student can be removed from Class.");
         if (!classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(userDb.Email))) return NotFound($"Student {userDb.Name} is no part of {classDb.Name} class therefore he can not be removed.");
         
-        classDb.ClassStudents.Remove(classDb.ClassStudents.Find(cs => cs != null && cs.StudentId.Equals(userDb.Email)));
+        classDb.ClassStudents.Remove(classDb.ClassStudents.Find(cs => cs.StudentId.Equals(userDb.Email)) ?? throw new InvalidOperationException());
         
         classRepository.UpdateEntity(classDb);
         

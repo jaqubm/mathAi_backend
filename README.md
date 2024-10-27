@@ -5,8 +5,7 @@ Work in progress!
 ## Tech stack
 
 - C#
-- .NET 8
-- .NET Core
+- .NET Core 8
 - Entity Framework
 - Google OAuth
 - Azure SQL

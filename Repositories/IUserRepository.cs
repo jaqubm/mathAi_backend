@@ -14,4 +14,5 @@ public interface IUserRepository
 
     public int UserExerciseSetsCount(User user);
     public List<ExerciseSet> GetUsersExerciseSetsByEmail(string email);
+    public List<AssignmentSubmission> GetAssignmentSubmissionsByEmail(string email);
 }

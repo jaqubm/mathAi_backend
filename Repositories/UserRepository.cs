@@ -56,4 +56,14 @@ public class UserRepository(IConfiguration config) : IUserRepository
         
         return userWithExerciseSets?.ExerciseSets as List<ExerciseSet> ?? [];
     }
+
+    public List<AssignmentSubmission> GetAssignmentSubmissionsByEmail(string email)
+    {
+        var userWithAssignmentSubmissions = _entityFramework
+            .User
+            .Include(u => u.AssignmentSubmissions)
+            .FirstOrDefault(u => u.Email == email);
+        
+        return userWithAssignmentSubmissions?.AssignmentSubmissions as List<AssignmentSubmission> ?? [];
+    }
 }
