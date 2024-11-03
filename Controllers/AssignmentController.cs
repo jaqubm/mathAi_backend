@@ -30,7 +30,11 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
         
         classDb.ClassStudents.ForEach(cs =>
         {
-            assignment.Submissions.Add(new AssignmentSubmission(assignment.Id, cs.StudentId));
+            assignment.Submissions.Add(new AssignmentSubmission
+            {
+                AssignmentId = assignment.Id, 
+                StudentId = cs.StudentId
+            });
         });
 
         Console.WriteLine(assignment.Submissions.Count);

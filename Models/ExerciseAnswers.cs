@@ -9,22 +9,30 @@ public class ExerciseAnswers
     [MaxLength(50)]
     public string Id { get; set; }
 
-    [Required]
-    [MaxLength(50)]
-    public string AssignmentSubmissionId { get; set; }
-
-    [Required]
-    [MaxLength(50)]
-    public string ExerciseId { get; set; }
-
     public string StudentAnswer { get; set; }
     public int? Grade { get; set; }
     public string Feedback { get; set; }
     public DateTime? AnsweredDate { get; set; }
-
+    
+    [Required]
+    [MaxLength(50)]
     [ForeignKey("AssignmentSubmissionId")]
+    public string AssignmentSubmissionId { get; set; }
     public virtual AssignmentSubmission AssignmentSubmission { get; set; }
-
+    
+    [Required]
+    [MaxLength(50)]
     [ForeignKey("ExerciseId")]
+    public string ExerciseId { get; set; }
     public virtual Exercise Exercise { get; set; }
+
+    public ExerciseAnswers()
+    {
+        Id = Guid.NewGuid().ToString();
+        StudentAnswer = string.Empty;
+        Feedback = string.Empty;
+        AnsweredDate = DateTime.Now;
+        AssignmentSubmissionId = string.Empty;
+        ExerciseId = string.Empty;
+    }
 }

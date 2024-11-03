@@ -49,17 +49,17 @@ CREATE TABLE mathAi.[Class]
         ON DELETE CASCADE
 );
 
-CREATE TABLE mathAi.[ClassStudents]
+CREATE TABLE mathAi.[ClassStudent]
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,          -- Surrogate key as primary key
     ClassId NVARCHAR(50) NOT NULL,            -- Foreign key linking the class
     StudentId NVARCHAR(255) NOT NULL,          -- Foreign key linking the student to a user (User)
 
-    CONSTRAINT FK_Class_ClassStudents FOREIGN KEY (ClassId)
+    CONSTRAINT FK_Class_ClassStudent FOREIGN KEY (ClassId)
         REFERENCES mathAi.[Class](Id)
         ON DELETE CASCADE,                     -- This remains if you want cascading deletes on Class
 
-    CONSTRAINT FK_User_ClassStudents FOREIGN KEY (StudentId)
+    CONSTRAINT FK_User_ClassStudent FOREIGN KEY (StudentId)
         REFERENCES mathAi.[User](Email)
         ON DELETE NO ACTION,                   -- Use NO ACTION to prevent multiple cascade paths
 
@@ -86,8 +86,7 @@ CREATE TABLE mathAi.[Assignment]
 );
 
 
--- Table to track assignment submissions by students
-CREATE TABLE mathAi.[AssignmentSubmissions]
+CREATE TABLE mathAi.[AssignmentSubmission]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,         -- Unique identifier for each submission
     AssignmentId NVARCHAR(50) NOT NULL,           -- Foreign key linking to the Assignment table
@@ -95,17 +94,16 @@ CREATE TABLE mathAi.[AssignmentSubmissions]
     SubmissionDate DATETIME,                      -- Timestamp for when the assignment was submitted
     Completed BIT NOT NULL DEFAULT 0,             -- Status flag to check if the assignment is completed
 
-    CONSTRAINT FK_Assignment_Submissions FOREIGN KEY (AssignmentId)
+    CONSTRAINT FK_Assignment_Submission FOREIGN KEY (AssignmentId)
         REFERENCES mathAi.[Assignment](Id)
         ON DELETE CASCADE,
 
-    CONSTRAINT FK_User_Submissions FOREIGN KEY (StudentId)
+    CONSTRAINT FK_User_Submission FOREIGN KEY (StudentId)
         REFERENCES mathAi.[User](Email)
         ON DELETE NO ACTION  -- Prevents cascading delete to avoid conflict
 );
 
 
--- Table to store each student's answers, grades, and feedback for each exercise
 CREATE TABLE mathAi.[ExerciseAnswers]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,          -- Unique identifier for each answer entry
@@ -116,20 +114,20 @@ CREATE TABLE mathAi.[ExerciseAnswers]
     Feedback NVARCHAR(MAX),                        -- Optional feedback from the teacher
     AnsweredDate DATETIME,                         -- Timestamp of when the student submitted their answer
 
-    CONSTRAINT FK_Submission_ExerciseAnswers FOREIGN KEY (AssignmentSubmissionId)
-        REFERENCES mathAi.[AssignmentSubmissions](Id)
+    CONSTRAINT FK_Submission_ExerciseAnswer FOREIGN KEY (AssignmentSubmissionId)
+        REFERENCES mathAi.[AssignmentSubmission](Id)
         ON DELETE CASCADE,
 
-    CONSTRAINT FK_Exercise_ExerciseAnswers FOREIGN KEY (ExerciseId)
+    CONSTRAINT FK_Exercise_ExerciseAnswer FOREIGN KEY (ExerciseId)
         REFERENCES mathAi.[Exercise](Id)
         ON DELETE NO ACTION  -- Prevents cascading delete to avoid conflict
 );
 
 
 DROP TABLE mathAi.[ExerciseAnswers];
-DROP TABLE mathAi.[AssignmentSubmissions];
+DROP TABLE mathAi.[AssignmentSubmission];
 DROP TABLE mathAi.[Assignment];
-DROP TABLE mathAi.[ClassStudents];
+DROP TABLE mathAi.[ClassStudent];
 DROP TABLE mathAi.[Class];
 DROP TABLE mathAi.[Exercise];
 DROP TABLE mathAi.[ExerciseSet];

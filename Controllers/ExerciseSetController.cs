@@ -1,5 +1,6 @@
 using AutoMapper;
 using mathAi_backend.Dtos;
+using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -9,40 +10,22 @@ namespace mathAi_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository, IUserRepository userRepository, IOpenAiRepository openAiRepository) : Controller
+public class ExerciseSetController(IConfiguration config, IExerciseSetRepository exerciseSetRepository, IUserRepository userRepository) : Controller
 {
+    private readonly OpenAiHelper _openAiHelper = new(config);
+    
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<ExerciseSetGeneratorDto, ExerciseSet>();
         c.CreateMap<ExerciseSet, ExerciseSet>();
     })); 
     
-    private static string ExerciseAnswerFormat()
-    {
-        return "Odpowiedź odeślij w formacie JSON, tak jak w przykładzie, w formacie gotowym do wyświetlenia na stronie internetowej:" +
-               "{Content: string," +
-               "FirstHint: string," +
-               "SecondHint: string," +
-               "ThirdHint: string," +
-               "Solution: string}";
-    }
-    
-    private static string GenerateExerciseSetPrompt(ExerciseSetGeneratorDto exerciseSetGenerator)
-    {
-        return $"Wygeneruj zadanie z Matematyki, wraz z trzema podpowiedziami oraz odpowiedzią dla ucznia " +
-               $"ze szkoły: {exerciseSetGenerator.SchoolType}, " +
-               $"klasa: {exerciseSetGenerator.Grade}, " +
-               $"o tematyce: {exerciseSetGenerator.Subject}. " + 
-               $"Zadanie powinno być ciekawe i rozbudowane.\n" + 
-               ExerciseAnswerFormat();
-    }
-    
     [HttpPost("Generate")]
     public async Task<ActionResult<ExerciseSet>> GenerateExerciseSet([FromBody] ExerciseSetGeneratorDto exerciseSetGenerator)
     {
         try
         {
-            var client = openAiRepository.CreateChatClient();
+            var client = _openAiHelper.CreateChatClient();
 
             var exerciseSetName = "Zestaw Zadań";
 
@@ -69,7 +52,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
 
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                ChatCompletion chatCompletion = await client.CompleteChatAsync(GenerateExerciseSetPrompt(exerciseSetGenerator));
+                ChatCompletion chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
 
                 try
                 {
@@ -117,15 +100,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
             UserId = userDb.Email,
         };
 
-        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise
-                 {
-                     Content = exercise.Content,
-                     FirstHint = exercise.FirstHint,
-                     SecondHint = exercise.SecondHint,
-                     ThirdHint = exercise.ThirdHint,
-                     Solution = exercise.Solution,
-                     ExerciseSetId = copiedExerciseSet.Id,
-                 }))
+        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise(exercise)))
         {
             copiedExerciseSet.Exercises.Add(copiedExercise);
         }
@@ -178,7 +153,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
     {
         try
         {
-            var client = openAiRepository.CreateChatClient();
+            var client = _openAiHelper.CreateChatClient();
             
             var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
             
@@ -198,7 +173,7 @@ public class ExerciseSetController(IExerciseSetRepository exerciseSetRepository,
             
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                ChatCompletion chatCompletion = await client.CompleteChatAsync(GenerateExerciseSetPrompt(exerciseSetGenerator));
+                ChatCompletion chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
 
                 try
                 {

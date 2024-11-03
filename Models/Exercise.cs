@@ -28,9 +28,8 @@ public class Exercise
     
     [Required]
     [MaxLength(50)]
-    public string ExerciseSetId { get; set; }
-    
     [ForeignKey("ExerciseSetId")]
+    public string ExerciseSetId { get; set; }
     public virtual ExerciseSet? ExerciseSet { get; set; }
     
     public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
@@ -39,12 +38,23 @@ public class Exercise
     public Exercise()
     {
         Id = Guid.NewGuid().ToString();
-        Content ??= "";
-        FirstHint ??= "";
-        SecondHint ??= "";
-        ThirdHint ??= "";
-        Solution ??= "";
-        ExerciseSetId ??= "";
+        Content ??= string.Empty;
+        FirstHint ??= string.Empty;
+        SecondHint ??= string.Empty;
+        ThirdHint ??= string.Empty;
+        Solution ??= string.Empty;
+        ExerciseSetId ??= string.Empty;
+    }
+
+    public Exercise(Exercise exercise)
+    {
+        Id = Guid.NewGuid().ToString();
+        Content = exercise.Content;
+        FirstHint = exercise.FirstHint;
+        SecondHint = exercise.SecondHint;
+        ThirdHint = exercise.ThirdHint;
+        Solution = exercise.Solution;
+        ExerciseSetId = exercise.ExerciseSetId;
     }
 
     public Exercise(string jsonString, string exerciseSetId)

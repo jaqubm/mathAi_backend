@@ -17,7 +17,11 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
         if (owner is null) return Unauthorized("User does not exist.");
         if (!owner.IsTeacher) return Unauthorized("Only Teacher is allowed to create Class.");
         
-        var newClass = new Class(classDto.Name, classDto.OwnerId);
+        var newClass = new Class
+        {
+            Name = classDto.Name, 
+            OwnerId = classDto.OwnerId
+        };
         
         classDto.ClassStudents.ForEach(s =>
         {
@@ -26,7 +30,12 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
             if (student is null || student.IsTeacher || owner.Email.Equals(student.Email)) return;
             if (newClass.ClassStudents.Exists(c => c.StudentId.Equals(student.Email))) return;
             
-            var classStudent = new ClassStudents(newClass.Id, student.Email);
+            var classStudent = new ClassStudents
+            {
+                ClassId = newClass.Id,
+                StudentId = student.Email
+            };
+            
             newClass.ClassStudents.Add(classStudent);
         });
         
@@ -70,7 +79,11 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
         if (classDb is null) return NotFound("Class with given ID was not found.");
         if (classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(userDb.Email))) return BadRequest($"Student {userDb.Name} is already a part of {classDb.Name} class.");
         
-        classDb.ClassStudents.Add(new ClassStudents(classDb.Id, userDb.Email));
+        classDb.ClassStudents.Add(new ClassStudents
+        {
+            ClassId = classDb.Id,
+            StudentId = userDb.Email
+        });
         
         classRepository.UpdateEntity(classDb);
         

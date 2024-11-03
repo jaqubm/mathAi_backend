@@ -7,27 +7,19 @@ public class ClassStudents
 {
     [Required]
     [MaxLength(50)]
-    public string ClassId { get; set; }
-    
     [ForeignKey("ClassId")]
+    public string ClassId { get; set; }
     public virtual Class? Class { get; set; }
 
     [Required]
     [MaxLength(255)]
-    public string StudentId { get; set; }
-    
     [ForeignKey("StudentId")]
+    public string StudentId { get; set; }
     public virtual User? Student { get; set; }
 
     public ClassStudents()
     {
-        ClassId ??= "";
-        StudentId ??= "";
-    }
-
-    public ClassStudents(string classId, string studentId)
-    {
-        ClassId = classId;
-        StudentId = studentId;
+        ClassId ??= string.Empty;
+        StudentId ??= string.Empty;
     }
 }
