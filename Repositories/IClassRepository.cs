@@ -4,13 +4,13 @@ namespace mathAi_backend.Repositories;
 
 public interface IClassRepository
 {
-    public bool SaveChanges();
+    public Task<bool> SaveChangesAsync();
 
-    public void AddEntity<T>(T entity);
+    public Task AddEntityAsync<T>(T entity);
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
-    public Class? GetClassById(string id);
-    public List<Class> GetClassesByOwnerId(string id);
-    public List<Class> GetClassesByStudentId(string id);
+    public Task<Class?> GetClassByIdAsync(string id);
+    public Task<List<Class>> GetClassesByOwnerIdAsync(string id);
+    public Task<List<Class>> GetClassesByStudentIdAsync(string id);
 }

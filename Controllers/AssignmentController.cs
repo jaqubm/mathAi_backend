@@ -16,13 +16,13 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
     })); 
     
     [HttpPost("Create")]
-    public ActionResult<string> CreateAssignment([FromBody] AssignmentDto assignmentDto)
+    public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentDto assignmentDto)
     {
-        var classDb = classRepository.GetClassById(assignmentDto.ClassId);
+        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
         
         if (classDb is null) return NotFound("Class not found.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(assignmentDto.ExerciseSetId);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
         
         if (exerciseSetDb is null) return NotFound("Exercise set not found.");
         
@@ -36,18 +36,16 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
                 StudentId = cs.StudentId
             });
         });
-
-        Console.WriteLine(assignment.Submissions.Count);
         
-        assignmentRepository.AddEntity(assignment);
+        await assignmentRepository.AddEntityAsync(assignment);
         
-        return assignmentRepository.SaveChanges() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
+        return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
     }
 
     [HttpGet("Get/{assignmentId}")]
-    public ActionResult<Assignment> GetAssignment([FromRoute] string assignmentId)
+    public async Task<ActionResult<Assignment>> GetAssignment([FromRoute] string assignmentId)
     {
-        var assignmentDb = assignmentRepository.GetAssignmentById(assignmentId);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
         if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
         
@@ -55,17 +53,17 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
     }
 
     [HttpPut("Update/{assignmentId}")]
-    public ActionResult<string> UpdateAssignment([FromRoute] string assignmentId, [FromBody] AssignmentDto assignmentDto)
+    public async Task<ActionResult<string>> UpdateAssignment([FromRoute] string assignmentId, [FromBody] AssignmentDto assignmentDto)
     {
-        var assignmentDb = assignmentRepository.GetAssignmentById(assignmentId);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
         if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
         
-        var classDb = classRepository.GetClassById(assignmentDto.ClassId);
+        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
         
         if (classDb is null) return NotFound("Class not found.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(assignmentDto.ExerciseSetId);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
         
         if (exerciseSetDb is null) return NotFound("Exercise set not found.");
         
@@ -73,18 +71,18 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
         
         assignmentRepository.UpdateEntity(assignmentDb);
         
-        return assignmentRepository.SaveChanges() ? Ok(assignmentDb.Id) : Problem("Error occured while updating assignment.");
+        return await assignmentRepository.SaveChangesAsync() ? Ok(assignmentDb.Id) : Problem("Error occured while updating assignment.");
     }
 
     [HttpDelete("Delete/{assignmentId}")]
-    public ActionResult<string> DeleteAssignment([FromRoute] string assignmentId)
+    public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
     {
-        var assignmentDb = assignmentRepository.GetAssignmentById(assignmentId);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
         if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
         
         assignmentRepository.DeleteEntity(assignmentDb);
         
-        return assignmentRepository.SaveChanges() ? Ok() : Problem("Error occured while deleting assignment.");
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting assignment.");
     }
 }

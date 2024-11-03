@@ -8,15 +8,15 @@ public class ClassRepository(IConfiguration config) : IClassRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
-    public bool SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        return _entityFramework.SaveChanges() > 0;
+        return await _entityFramework.SaveChangesAsync() > 0;
     }
 
-    public void AddEntity<T>(T entity)
+    public async Task AddEntityAsync<T>(T entity)
     {
         if (entity is not null)
-            _entityFramework.Add(entity);
+            await _entityFramework.AddAsync(entity);
     }
 
     public void UpdateEntity<T>(T entity)
@@ -31,38 +31,39 @@ public class ClassRepository(IConfiguration config) : IClassRepository
             _entityFramework.Remove(entity);
     }
 
-    public Class? GetClassById(string id)
+    public async Task<Class?> GetClassByIdAsync(string id)
     {
-        return _entityFramework
+        return await _entityFramework
             .Class
             .Include(c => c.ClassStudents)
             .Include(c => c.Assignments)
-            .FirstOrDefault(c => c.Id == id);
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public List<Class> GetClassesByOwnerId(string id)
+    public async Task<List<Class>> GetClassesByOwnerIdAsync(string id)
     {
-        return _entityFramework.Class
+        return await _entityFramework
+            .Class
             .Include(c => c.ClassStudents)
             .Where(c => c.OwnerId == id)
-            .ToList();
+            .ToListAsync();
     }
 
-    public List<Class> GetClassesByStudentId(string id)
+    public async Task<List<Class>> GetClassesByStudentIdAsync(string id)
     {
-        var classIdsList = _entityFramework
+        var classIdsList = await _entityFramework
             .ClassStudents
             .Where(cs => cs.StudentId == id).Select(cs => cs.ClassId)
-            .ToList();
+            .ToListAsync();
         
         var studentClasses = new List<Class>();
-        
-        classIdsList.ForEach(x =>
+
+        foreach (var classId in classIdsList)
         {
-            var classDb = GetClassById(x);
-            if (classDb is null) return;
+            var classDb = await GetClassByIdAsync(classId);
+            if (classDb is null) continue;
             studentClasses.Add(classDb);
-        });
+        }
 
         return studentClasses;
     }

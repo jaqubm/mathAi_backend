@@ -8,15 +8,15 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
 {
     private readonly DataContext _entityFramework = new(config);
     
-    public bool SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        return _entityFramework.SaveChanges() > 0;
+        return await _entityFramework.SaveChangesAsync() > 0;
     }
 
-    public void AddEntity<T>(T entity)
+    public async Task AddEntityAsync<T>(T entity)
     {
         if (entity is not null)
-            _entityFramework.Add(entity);
+            await _entityFramework.AddAsync(entity);
     }
 
     public void UpdateEntity<T>(T entity)
@@ -31,13 +31,11 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
             _entityFramework.Remove(entity);
     }
 
-    public ExerciseSet? GetExerciseSetById(string exerciseSetId)
+    public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)
     {
-        var exerciseSetDb = _entityFramework
+        return await _entityFramework
             .ExerciseSet
             .Include(es => es.Exercises)
-            .FirstOrDefault(es => es.Id == exerciseSetId);
-        
-        return exerciseSetDb;
+            .FirstOrDefaultAsync(es => es.Id == exerciseSetId);
     }
 }

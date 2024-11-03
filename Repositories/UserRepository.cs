@@ -8,15 +8,15 @@ public class UserRepository(IConfiguration config) : IUserRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
-    public bool SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        return _entityFramework.SaveChanges() > 0;
+        return await _entityFramework.SaveChangesAsync() > 0;
     }
 
-    public void AddEntity<T>(T entity)
+    public async Task AddEntityAsync<T>(T entity)
     {
         if (entity is not null)
-            _entityFramework.Add(entity);
+            await _entityFramework.AddAsync(entity);
     }
 
     public void UpdateEntity<T>(T entity)
@@ -25,44 +25,45 @@ public class UserRepository(IConfiguration config) : IUserRepository
             _entityFramework.Update(entity);
     }
 
-    public User? GetUserByEmail(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return _entityFramework
+        return await _entityFramework
             .User
-            .FirstOrDefault(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public bool UserExist(string email)
+    public async Task<bool> UserExistAsync(string email)
     {
-        var userDb = _entityFramework
-            .Find<User>(email);
+        var userDb = await _entityFramework
+            .User
+            .FirstOrDefaultAsync(user => user.Email == email);
 
         return userDb is not null;
     }
 
-    public int UserExerciseSetsCount(User user)
+    public async Task<int> UserExerciseSetsCountAsync(User user)
     {
-        return _entityFramework
+        return await _entityFramework
             .ExerciseSet
-            .Count(e => e.UserId == user.Email);
+            .CountAsync(e => e.UserId == user.Email);
     }
     
-    public List<ExerciseSet> GetUsersExerciseSetsByEmail(string email)
+    public async Task<List<ExerciseSet>> GetUsersExerciseSetsByEmailAsync(string email)
     {
-        var userWithExerciseSets = _entityFramework
+        var userWithExerciseSets = await _entityFramework
             .User
             .Include(u => u.ExerciseSets)
-            .FirstOrDefault(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
         
         return userWithExerciseSets?.ExerciseSets as List<ExerciseSet> ?? [];
     }
 
-    public List<AssignmentSubmission> GetAssignmentSubmissionsByEmail(string email)
+    public async Task<List<AssignmentSubmission>> GetAssignmentSubmissionsByEmailAsync(string email)
     {
-        var userWithAssignmentSubmissions = _entityFramework
+        var userWithAssignmentSubmissions = await _entityFramework
             .User
             .Include(u => u.AssignmentSubmissions)
-            .FirstOrDefault(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
         
         return userWithAssignmentSubmissions?.AssignmentSubmissions as List<AssignmentSubmission> ?? [];
     }

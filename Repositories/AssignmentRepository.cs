@@ -8,15 +8,15 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
-    public bool SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        return _entityFramework.SaveChanges() > 0;
+        return await _entityFramework.SaveChangesAsync() > 0;
     }
 
-    public void AddEntity<T>(T entity)
+    public async Task AddEntityAsync<T>(T entity)
     {
         if (entity is not null)
-            _entityFramework.Add(entity);
+           await _entityFramework.AddAsync(entity);
     }
 
     public void UpdateEntity<T>(T entity)
@@ -31,12 +31,12 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             _entityFramework.Remove(entity);
     }
 
-    public Assignment? GetAssignmentById(string id)
+    public async Task<Assignment?> GetAssignmentByIdAsync(string id)
     {
-        return _entityFramework
+        return await _entityFramework
             .Assignment
             .Include(a => a.Class)
             .Include(a => a.ExerciseSet)
-            .FirstOrDefault(a => a.Id == id);
+            .FirstOrDefaultAsync(a => a.Id == id);
     }
 }
