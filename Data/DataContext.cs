@@ -9,9 +9,9 @@ public class DataContext(IConfiguration config) : DbContext
     public virtual DbSet<Exercise> Exercise { get; set; }
     public virtual DbSet<ExerciseSet> ExerciseSet { get; set; }
     public virtual DbSet<Class> Class { get; set; }
-    public virtual DbSet<ClassStudents> ClassStudents { get; set; }
+    public virtual DbSet<ClassStudents> ClassStudent { get; set; }
     public virtual DbSet<Assignment> Assignment { get; set; }
-    public virtual DbSet<AssignmentSubmission> AssignmentSubmissions { get; set; }
+    public virtual DbSet<AssignmentSubmission> AssignmentSubmission { get; set; }
     public virtual DbSet<ExerciseAnswers> ExerciseAnswers { get; set; }
 
 

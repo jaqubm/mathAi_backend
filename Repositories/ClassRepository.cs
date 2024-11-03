@@ -52,7 +52,7 @@ public class ClassRepository(IConfiguration config) : IClassRepository
     public async Task<List<Class>> GetClassesByStudentIdAsync(string id)
     {
         var classIdsList = await _entityFramework
-            .ClassStudents
+            .ClassStudent
             .Where(cs => cs.StudentId == id).Select(cs => cs.ClassId)
             .ToListAsync();
         
