@@ -56,6 +56,8 @@ else
 {
     app.UseCors("ProdCors");
     app.UseHttpsRedirection();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseAuthentication();
