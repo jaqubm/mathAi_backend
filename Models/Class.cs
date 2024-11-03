@@ -16,26 +16,17 @@ public class Class
     
     [Required]
     [MaxLength(255)]
-    public string OwnerId { get; set; }
-    
     [ForeignKey("OwnerId")]
+    public string OwnerId { get; set; }
     public virtual User? Owner { get; set; }
 
     public virtual List<ClassStudents> ClassStudents { get; set; } = [];
-
     public virtual List<Assignment> Assignments { get; set; } = [];
 
     public Class()
     {
         Id = Guid.NewGuid().ToString();
-        Name ??= "";
-        OwnerId ??= "";
-    }
-
-    public Class(string name, string ownerId)
-    {
-        Id = Guid.NewGuid().ToString();
-        Name = name;
-        OwnerId = ownerId;
+        Name ??= string.Empty;
+        OwnerId ??= string.Empty;
     }
 }

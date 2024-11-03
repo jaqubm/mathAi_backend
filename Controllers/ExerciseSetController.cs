@@ -100,15 +100,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             UserId = userDb.Email,
         };
 
-        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise
-                 {
-                     Content = exercise.Content,
-                     FirstHint = exercise.FirstHint,
-                     SecondHint = exercise.SecondHint,
-                     ThirdHint = exercise.ThirdHint,
-                     Solution = exercise.Solution,
-                     ExerciseSetId = copiedExerciseSet.Id,
-                 }))
+        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise(exercise)))
         {
             copiedExerciseSet.Exercises.Add(copiedExercise);
         }

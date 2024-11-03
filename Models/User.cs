@@ -20,31 +20,16 @@ public class User
     [Required]
     public bool FirstTimeSignIn { get; set; }
 
-    // One-to-many relationship with ExerciseSets
     public virtual ICollection<ExerciseSet> ExerciseSets { get; set; } = [];
-
-    // One-to-many relationship with Classes (for Teachers)
     public virtual ICollection<Class> Classes { get; set; } = [];
-
-    // Many-to-many relationship with Classes (for Students)
     public virtual ICollection<ClassStudents> StudentClasses { get; set; } = [];
-
-    // Many-to-many relationship with Assignments (for Students)
     public virtual ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; } = [];
-
 
     public User()
     {
-        Email ??= "";
-        Name ??= "";
+        Email ??= string.Empty;
+        Name ??= string.Empty;
+        IsTeacher = false;
         FirstTimeSignIn = true;
-    }
-
-    public User(string email, string name, bool isTeacher = false, bool firstTimeSignIn = true)
-    {
-        Email = email;
-        Name = name;
-        IsTeacher = isTeacher;
-        FirstTimeSignIn = firstTimeSignIn;
     }
 }

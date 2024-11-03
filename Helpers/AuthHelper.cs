@@ -9,9 +9,10 @@ public static class AuthHelper
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(token);
 
-        return new User(
-            name: payload.Name,
-            email: payload.Email
-        );
+        return new User
+        {
+            Name = payload.Name,
+            Email = payload.Email
+        };
     }
 }

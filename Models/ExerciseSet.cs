@@ -24,14 +24,13 @@ public class ExerciseSet
     [Required]
     [MaxLength(255)]
     public string Subject { get; set; }
-
-    public virtual ICollection<Exercise> Exercises { get; set; } = [];
     
     [MaxLength(255)]
-    public string? UserId { get; set; }
-    
     [ForeignKey("UserId")]
+    public string? UserId { get; set; }
     public virtual User? User { get; set; }
+
+    public virtual ICollection<Exercise> Exercises { get; set; } = [];
 
     public ExerciseSet()
     {

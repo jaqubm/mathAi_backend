@@ -22,16 +22,14 @@ public class Assignment
 
     [Required]
     [MaxLength(50)]
-    public string ClassId { get; set; }
-    
     [ForeignKey("ClassId")]
+    public string ClassId { get; set; }
     public virtual Class? Class { get; set; }
 
     [Required]
     [MaxLength(50)]
-    public string ExerciseSetId { get; set; }
-    
     [ForeignKey("ExerciseSetId")]
+    public string ExerciseSetId { get; set; }
     public virtual ExerciseSet? ExerciseSet { get; set; }
     
     public virtual ICollection<AssignmentSubmission> Submissions { get; set; } = [];
@@ -40,20 +38,10 @@ public class Assignment
     public Assignment()
     {
         Id = Guid.NewGuid().ToString();
-        Name ??= "";
+        Name ??= string.Empty;
         StartDate = DateTime.Now;
         DueDate = DateTime.Now;
-        ClassId ??= "";
-        ExerciseSetId ??= "";
-    }
-
-    public Assignment(string name, DateTime startDate, DateTime dueDate, string classId, string exerciseSetId)
-    {
-        Id = Guid.NewGuid().ToString();
-        Name = name;
-        StartDate = startDate;
-        DueDate = dueDate;
-        ClassId = classId;
-        ExerciseSetId = exerciseSetId;
+        ClassId ??= string.Empty;
+        ExerciseSetId ??= string.Empty;
     }
 }
