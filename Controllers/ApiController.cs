@@ -1,14 +1,15 @@
 using mathAi_backend.Data;
-using mathAi_backend.Repositories;
+using mathAi_backend.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using OpenAI.Chat;
 
 namespace mathAi_backend.Controllers;
 
 [Route("[controller]")]
-public class ApiController(IConfiguration config, IOpenAiRepository openAiRepository) : ControllerBase
+public class ApiController(IConfiguration config) : ControllerBase
 {
     private readonly DataContext _entityFramework = new(config);
+    private readonly OpenAiHelper _openAiHelper = new(config);
     
     [HttpGet("Status")]
     public async Task<ActionResult<Dictionary<string, string>>> GetStatus()
@@ -17,7 +18,7 @@ public class ApiController(IConfiguration config, IOpenAiRepository openAiReposi
         
         try
         {
-            var client = openAiRepository.CreateChatClient();
+            var client = _openAiHelper.CreateChatClient();
             ChatCompletion openAiConnectionStatus = await client.CompleteChatAsync("Write OK if connection was successful");
 
             return Ok(new Dictionary<string, string>
