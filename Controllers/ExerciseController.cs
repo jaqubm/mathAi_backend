@@ -16,9 +16,9 @@ public class ExerciseController(IExerciseRepository exerciseRepository) : Contro
     })); 
     
     [HttpGet("Get/{exerciseId}")]
-    public ActionResult<Exercise> GetExercise([FromRoute] string exerciseId)
+    public async Task<ActionResult<Exercise>> GetExercise([FromRoute] string exerciseId)
     {
-        var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);
+        var exerciseDb = await exerciseRepository.GetExerciseByIdAsync(exerciseId);
         
         if (exerciseDb is not null) return exerciseDb;
         
@@ -26,24 +26,24 @@ public class ExerciseController(IExerciseRepository exerciseRepository) : Contro
     }
 
     [HttpPut("Update/{exerciseId}")]
-    public ActionResult<Exercise> UpdateExercise([FromRoute] string exerciseId, [FromBody] ExerciseDto exercise)
+    public async Task<ActionResult<Exercise>> UpdateExercise([FromRoute] string exerciseId, [FromBody] ExerciseDto exercise)
     {
-        var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);
+        var exerciseDb = await exerciseRepository.GetExerciseByIdAsync(exerciseId);
         
         _mapper.Map(exercise, exerciseDb);
         
         exerciseRepository.UpdateEntity(exerciseDb);
         
-        return exerciseRepository.SaveChanges() ? Ok(exerciseDb) : Problem("Failed to update exercise.");
+        return await exerciseRepository.SaveChangesAsync() ? Ok(exerciseDb) : Problem("Failed to update exercise.");
     }
 
     [HttpDelete("Delete/{exerciseId}")]
-    public IActionResult DeleteExercise([FromRoute] string exerciseId)
+    public async Task<IActionResult> DeleteExercise([FromRoute] string exerciseId)
     {
-        var exerciseDb = exerciseRepository.GetExerciseById(exerciseId);
+        var exerciseDb = await exerciseRepository.GetExerciseByIdAsync(exerciseId);
         
         exerciseRepository.DeleteEntity(exerciseDb);
         
-        return exerciseRepository.SaveChanges() ? NoContent() : Problem("Failed to delete exercise.");
+        return await exerciseRepository.SaveChangesAsync() ? NoContent() : Problem("Failed to delete exercise.");
     }
 }

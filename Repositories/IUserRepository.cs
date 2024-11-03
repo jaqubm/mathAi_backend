@@ -4,15 +4,15 @@ namespace mathAi_backend.Repositories;
 
 public interface IUserRepository
 {
-    public bool SaveChanges();
+    public Task<bool> SaveChangesAsync();
     
-    public void AddEntity<T>(T entity);
+    public Task AddEntityAsync<T>(T entity);
     public void UpdateEntity<T>(T entity);
 
-    public User? GetUserByEmail(string email);
-    public bool UserExist(string email);
+    public Task<User?> GetUserByEmailAsync(string email);
+    public Task<bool> UserExistAsync(string email);
 
-    public int UserExerciseSetsCount(User user);
-    public List<ExerciseSet> GetUsersExerciseSetsByEmail(string email);
-    public List<AssignmentSubmission> GetAssignmentSubmissionsByEmail(string email);
+    public Task<int> UserExerciseSetsCountAsync(User user);
+    public Task<List<ExerciseSet>> GetUsersExerciseSetsByEmailAsync(string email);
+    public Task<List<AssignmentSubmission>> GetAssignmentSubmissionsByEmailAsync(string email);
 }

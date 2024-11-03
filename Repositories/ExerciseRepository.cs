@@ -1,5 +1,6 @@
 using mathAi_backend.Data;
 using mathAi_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
@@ -7,15 +8,9 @@ public class ExerciseRepository(IConfiguration config) : IExerciseRepository
 {
     private readonly DataContext _entityFramework = new(config);
     
-    public bool SaveChanges()
+    public async Task<bool> SaveChangesAsync()
     {
-        return _entityFramework.SaveChanges() > 0;
-    }
-
-    public void AddEntity<T>(T entity)
-    {
-        if (entity is not null)
-            _entityFramework.Add(entity);
+        return await _entityFramework.SaveChangesAsync() > 0;
     }
 
     public void UpdateEntity<T>(T entity)
@@ -30,11 +25,10 @@ public class ExerciseRepository(IConfiguration config) : IExerciseRepository
             _entityFramework.Remove(entity);
     }
 
-    public Exercise? GetExerciseById(string exerciseId)
+    public async Task<Exercise?> GetExerciseByIdAsync(string exerciseId)
     {
-        var exerciseDb = _entityFramework
-            .Find<Exercise>(exerciseId);
-        
-        return exerciseDb;
+        return await _entityFramework
+            .Exercise
+            .FirstOrDefaultAsync(exercise => exercise.Id == exerciseId);
     }
 }

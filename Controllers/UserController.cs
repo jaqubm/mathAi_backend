@@ -37,11 +37,11 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
         {
             var user = await AuthHelper.GetUserFromGoogleToken(idToken);
             
-            if (userRepository.UserExist(user.Email)) return Ok();
+            if (await userRepository.UserExistAsync(user.Email)) return Ok();
         
-            userRepository.AddEntity(user);
+            await userRepository.AddEntityAsync(user);
             
-            return userRepository.SaveChanges() ? Ok() : Problem("Failed to add user to database.");
+            return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to add user to database.");
         }
         catch (Exception e)
         {
@@ -50,15 +50,15 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
     }
     
     [HttpGet("Exist/{email}")]
-    public ActionResult<bool> UserExists([FromRoute] string email)
+    public async Task<ActionResult<bool>> UserExists([FromRoute] string email)
     {
-        return Ok(userRepository.UserExist(email));
+        return Ok(await userRepository.UserExistAsync(email));
     }
 
     [HttpGet("FirstTimeSignIn/{email}")]
-    public ActionResult<bool> FirstTimeSignIn([FromRoute] string email)
+    public async Task<ActionResult<bool>> FirstTimeSignIn([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
@@ -67,9 +67,9 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
     }
 
     [HttpGet("IsTeacher/{email}")]
-    public ActionResult<bool> IsTeacher([FromRoute] string email)
+    public async Task<ActionResult<bool>> IsTeacher([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
@@ -78,9 +78,9 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
     }
 
     [HttpPut("UpdateToTeacher/{email}")]
-    public ActionResult UpdateToTeacher([FromRoute] string email)
+    public async Task<ActionResult> UpdateToTeacher([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
@@ -90,13 +90,13 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
 
         userRepository.UpdateEntity(userDb);
         
-        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to teacher account.");
+        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update account to teacher account.");
     }
     
     [HttpPut("UpdateToStudent/{email}")]
-    public ActionResult UpdateToStudent([FromRoute] string email)
+    public async Task<ActionResult> UpdateToStudent([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
@@ -106,18 +106,18 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
 
         userRepository.UpdateEntity(userDb);
         
-        return userRepository.SaveChanges() ? Ok() : Problem("Failed to update account to student account.");
+        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update account to student account.");
     }
 
     [HttpGet("GetExerciseSets/{email}")]
-    public ActionResult<List<ExerciseSetDto>> GetExerciseSets([FromRoute] string email)
+    public async Task<ActionResult<List<ExerciseSetDto>>> GetExerciseSets([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
 
-        var exerciseSets = userRepository.GetUsersExerciseSetsByEmail(email);
+        var exerciseSets = await userRepository.GetUsersExerciseSetsByEmailAsync(email);
         
         var sortedExerciseSets = exerciseSets
             .OrderBy(x => ExtractExerciseSetNumber(x.Name))
@@ -128,35 +128,42 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
     }
     
     [HttpGet("GetClasses/{email}")]
-    public ActionResult<List<Class>> GetClasses([FromRoute] string email)
+    public async Task<ActionResult<List<Class>>> GetClasses([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null) 
             return NotFound("User not found.");
 
         var userClasses = userDb.IsTeacher switch
         {
-            true => classRepository.GetClassesByOwnerId(userDb.Email),
-            false => classRepository.GetClassesByStudentId(userDb.Email)
+            true => classRepository.GetClassesByOwnerIdAsync(userDb.Email),
+            false => classRepository.GetClassesByStudentIdAsync(userDb.Email)
         };
 
         return Ok(userClasses);
     }
 
     [HttpGet("GetAssignmentSubmissions/{email}")]
-    public ActionResult<List<AssignmentSubmission>> GetAssignmentSubmissions([FromRoute] string email)
+    public async Task<ActionResult<List<AssignmentSubmission>>> GetAssignmentSubmissions([FromRoute] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
         
         if (userDb is null)
             return NotFound("User not found.");
         
-        var assignmentSubmissions = userRepository.GetAssignmentSubmissionsByEmail(email);
+        var assignmentSubmissions = await userRepository.GetAssignmentSubmissionsByEmailAsync(email);
+
+        foreach (var assignmentSubmission in assignmentSubmissions)
+        {
+            assignmentSubmission.Assignment =
+                await assignmentRepository.GetAssignmentByIdAsync(assignmentSubmission.AssignmentId) ??
+                throw new InvalidOperationException();
+        }
         
-        assignmentSubmissions.ForEach(sub => sub.Assignment = assignmentRepository.GetAssignmentById(sub.AssignmentId) ?? throw new InvalidOperationException());
-        
-        var sortedAssignmentSubmissions = assignmentSubmissions.OrderBy(sub => sub.Assignment.DueDate).ToList();
+        var sortedAssignmentSubmissions = assignmentSubmissions
+            .OrderBy(sub => sub.Assignment.DueDate)
+            .ToList();
         
         return Ok(sortedAssignmentSubmissions);
     }

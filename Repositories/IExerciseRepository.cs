@@ -4,11 +4,10 @@ namespace mathAi_backend.Repositories;
 
 public interface IExerciseRepository
 {
-    public bool SaveChanges();
-
-    public void AddEntity<T>(T entity);
+    public Task<bool> SaveChangesAsync();
+    
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
-    public Exercise? GetExerciseById(string exerciseId);
+    public Task<Exercise?> GetExerciseByIdAsync(string exerciseId);
 }

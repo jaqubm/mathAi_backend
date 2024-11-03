@@ -31,12 +31,12 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             if (!string.IsNullOrEmpty(exerciseSetGenerator.UserId))
             {
-                var userDb = userRepository.GetUserByEmail(exerciseSetGenerator.UserId);
+                var userDb = await userRepository.GetUserByEmailAsync(exerciseSetGenerator.UserId);
                 
                 if (userDb is null)
                     return Unauthorized();
                 
-                exerciseSetName += $" {userRepository.UserExerciseSetsCount(userDb) + 1}";
+                exerciseSetName += $" {await userRepository.UserExerciseSetsCountAsync(userDb) + 1}";
             }
             else
             {
@@ -66,9 +66,9 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
                 }
             }
             
-            exerciseSetRepository.AddEntity(exerciseSet);
+            await exerciseSetRepository.AddEntityAsync(exerciseSet);
             
-            return exerciseSetRepository.SaveChanges() ? Ok(exerciseSet.Id) : Problem("Failed to create exercise set.");
+            return await exerciseSetRepository.SaveChangesAsync() ? Ok(exerciseSet.Id) : Problem("Failed to create exercise set.");
         }
         catch (Exception e)
         {
@@ -77,19 +77,19 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
     }
     
     [HttpPost("Copy/{exerciseSetId}")]
-    public ActionResult<ExerciseSet> CopyExerciseSet([FromRoute] string exerciseSetId, [FromBody] string email)
+    public async Task<ActionResult<ExerciseSet>> CopyExerciseSet([FromRoute] string exerciseSetId, [FromBody] string email)
     {
-        var userDb = userRepository.GetUserByEmail(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
                 
         if (userDb is null)
             return Unauthorized("You don't have permission to copy exercise set.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
             
         if (exerciseSetDb is null)
             return NotFound($"Could not find exercise set with id {exerciseSetId}");
         
-        var exerciseSetName = $"Zestaw Zadań {userRepository.UserExerciseSetsCount(userDb) + 1}";
+        var exerciseSetName = $"Zestaw Zadań {await userRepository.UserExerciseSetsCountAsync(userDb) + 1}";
 
         var copiedExerciseSet = new ExerciseSet
         {
@@ -105,32 +105,32 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             copiedExerciseSet.Exercises.Add(copiedExercise);
         }
         
-        exerciseSetRepository.AddEntity(copiedExerciseSet);
+        await exerciseSetRepository.AddEntityAsync(copiedExerciseSet);
             
-        return exerciseSetRepository.SaveChanges() ? Ok(copiedExerciseSet.Id) : Problem("Failed to copy exercise set.");
+        return await exerciseSetRepository.SaveChangesAsync() ? Ok(copiedExerciseSet.Id) : Problem("Failed to copy exercise set.");
     }
     
     [HttpGet("Get/{exerciseSetId}")]
-    public ActionResult<ExerciseSet> GetExerciseSet([FromRoute] string exerciseSetId)
+    public async Task<ActionResult<ExerciseSet>> GetExerciseSet([FromRoute] string exerciseSetId)
     {
-        var exerciseSetDb = exerciseSetRepository
-            .GetExerciseSetById(exerciseSetId);
+        var exerciseSetDb = await exerciseSetRepository
+            .GetExerciseSetByIdAsync(exerciseSetId);
         
         return exerciseSetDb is not null ? Ok(exerciseSetDb) : NotFound("Exercise set not found.");
     }
     
     [HttpPut("Update")]
-    public ActionResult<ExerciseSet> UpdateExerciseSet([FromBody] ExerciseSet exerciseSet)
+    public async Task<ActionResult<ExerciseSet>> UpdateExerciseSet([FromBody] ExerciseSet exerciseSet)
     {
         if (string.IsNullOrEmpty(exerciseSet.UserId))
             return Unauthorized("You don't have permission to update exercise set.");
         
-        var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSet.Id);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSet.Id);
             
         if (exerciseSetDb is null)
             return NotFound($"Could not find exercise set with id {exerciseSet.Id}");
         
-        var userDb = userRepository.GetUserByEmail(exerciseSet.UserId);
+        var userDb = await userRepository.GetUserByEmailAsync(exerciseSet.UserId);
         
         if (userDb is null)
             return Unauthorized("You don't have permission to update the exercise set.");
@@ -145,7 +145,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         
         exerciseSetRepository.UpdateEntity(exerciseSetDb);
         
-        return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to update exercise set.");
+        return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update exercise set.");
     }
 
     [HttpPut("GenerateAdditionalExercise/{exerciseSetId}")]
@@ -155,7 +155,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         {
             var client = _openAiHelper.CreateChatClient();
             
-            var exerciseSetDb = exerciseSetRepository.GetExerciseSetById(exerciseSetId);
+            var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
             
             if (exerciseSetDb is null)
                 return NotFound($"Could not find exercise set with id {exerciseSetId}");
@@ -189,7 +189,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             
             exerciseSetRepository.UpdateEntity(exerciseSetDb);
             
-            return exerciseSetRepository.SaveChanges() ? Ok() : Problem("Failed to generate additional exercise and add it to the exercise set.");
+            return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to generate additional exercise and add it to the exercise set.");
         }
         catch (Exception e)
         {

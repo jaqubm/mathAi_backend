@@ -4,11 +4,11 @@ namespace mathAi_backend.Repositories;
 
 public interface IAssignmentRepository
 {
-    public bool SaveChanges();
+    public Task<bool> SaveChangesAsync();
 
-    public void AddEntity<T>(T entity);
+    public Task AddEntityAsync<T>(T entity);
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
-    public Assignment? GetAssignmentById(string id);
+    public Task<Assignment?> GetAssignmentByIdAsync(string id);
 }
