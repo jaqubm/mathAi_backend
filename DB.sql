@@ -1,3 +1,5 @@
+CREATE DATABASE [mathAi-DB] GO;
+
 CREATE SCHEMA mathAi;
 
 
