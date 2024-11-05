@@ -4,6 +4,7 @@ using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
