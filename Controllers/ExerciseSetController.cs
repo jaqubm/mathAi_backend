@@ -52,11 +52,11 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                ChatCompletion chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
+                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
 
                 try
                 {
-                    var exercise = new Exercise(chatCompletion.ToString(), exerciseSet.Id);
+                    var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSet.Id);
 
                     exerciseSet.Exercises.Add(exercise);
                 }
@@ -173,11 +173,11 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                ChatCompletion chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
+                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
 
                 try
                 {
-                    var exercise = new Exercise(chatCompletion.ToString(), exerciseSetDb.Id);
+                    var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSetDb.Id);
 
                     exerciseSetDb.Exercises.Add(exercise);
                 }

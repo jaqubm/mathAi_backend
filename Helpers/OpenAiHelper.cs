@@ -7,7 +7,7 @@ public class OpenAiHelper(IConfiguration config)
 {
     public ChatClient CreateChatClient()
     {
-        return new ChatClient(model: "gpt-4o", config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
+        return new ChatClient(model: "gpt-4o", apiKey: config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
     }
     
     public static string GenerateExerciseSetPrompt(ExerciseSetGeneratorDto exerciseSetGenerator)
