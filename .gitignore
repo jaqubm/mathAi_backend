@@ -531,3 +531,5 @@ fabric.properties
 .ionide
 
 .idea
+
+appsettings.Development.json

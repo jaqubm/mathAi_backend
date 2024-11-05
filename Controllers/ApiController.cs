@@ -19,13 +19,13 @@ public class ApiController(IConfiguration config) : ControllerBase
         try
         {
             var client = _openAiHelper.CreateChatClient();
-            ChatCompletion openAiConnectionStatus = await client.CompleteChatAsync("Write OK if connection was successful");
+            var openAiConnectionStatus = await client.CompleteChatAsync("Write OK if connection was successful");
 
             return Ok(new Dictionary<string, string>
             {
                 { "apiStatus", "OK" },
                 { "databaseConnectionStatus", databaseConnectionStatus ? "OK" : "Failed" },
-                { "openAiApiConnectionStatus", openAiConnectionStatus.ToString() }
+                { "openAiApiConnectionStatus", openAiConnectionStatus.Value.Content[0].Text }
             });
         }
         catch
