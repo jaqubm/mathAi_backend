@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
@@ -12,7 +11,7 @@ namespace mathAi_backend.Controllers;
 [Authorize]
 [ApiController]
 [Route("[controller]")]
-public partial class UserController(IUserRepository userRepository) : ControllerBase
+public class UserController(IUserRepository userRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
@@ -20,15 +19,6 @@ public partial class UserController(IUserRepository userRepository) : Controller
         c.CreateMap<ExerciseSet, ExerciseSetListDto>();
         c.CreateMap<Class, ClassListDto>();
     })); 
-    
-    [GeneratedRegex(@"\d+")]
-    private static partial Regex ExerciseSetNameRegex();
-    
-    private static int ExtractExerciseSetNumber(string exerciseSetName)
-    {
-        var match = ExerciseSetNameRegex().Match(exerciseSetName);
-        return match.Success ? int.Parse(match.Value) : int.MaxValue;
-    }
 
     [HttpGet("Get")]
     public async Task<ActionResult<UserDto>> GetUser()
@@ -63,8 +53,8 @@ public partial class UserController(IUserRepository userRepository) : Controller
         return Ok(exerciseSetsList);
     }
 
-    [HttpGet("GetClassesList")]
-    public async Task<ActionResult<List<ClassListDto>>> GetUserClassesList()
+    [HttpGet("GetClassList")]
+    public async Task<ActionResult<List<ClassListDto>>> GetUserClassList()
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
@@ -72,13 +62,15 @@ public partial class UserController(IUserRepository userRepository) : Controller
         if (userDb is null)
             return Unauthorized("User does not exist!");
         
-        var classesList = userDb.IsTeacher switch
+        var classListDb = userDb.IsTeacher switch
         {
             true => await userRepository.GetClassListByOwnerIdAsync(userId),
             false => await userRepository.GetClassListByStudentIdAsync(userId)
         };
         
-        return Ok(classesList);
+        var classList = _mapper.Map<List<ClassListDto>>(classListDb);
+        
+        return Ok(classList);
     }
 
     /*[HttpGet("GetAssignmentSubmissions/{email}")]

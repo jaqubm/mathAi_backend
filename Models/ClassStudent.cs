@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace mathAi_backend.Models;
 
-public class ClassStudents
+public class ClassStudent
 {
     [Required]
     [MaxLength(50)]
@@ -17,7 +17,7 @@ public class ClassStudents
     public string StudentId { get; set; }
     public virtual User? Student { get; set; }
 
-    public ClassStudents()
+    public ClassStudent()
     {
         ClassId ??= string.Empty;
         StudentId ??= string.Empty;

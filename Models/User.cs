@@ -25,7 +25,7 @@ public class User
 
     public virtual ICollection<ExerciseSet> ExerciseSets { get; set; } = [];
     public virtual ICollection<Class> Classes { get; set; } = [];
-    public virtual ICollection<ClassStudents> StudentClasses { get; set; } = [];
+    public virtual ICollection<ClassStudent> StudentClasses { get; set; } = [];
     public virtual ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; } = [];
 
     public User()
@@ -33,7 +33,7 @@ public class User
         Id ??= string.Empty;
         Email ??= string.Empty;
         Name ??= string.Empty;
-        IsTeacher = false;
+        IsTeacher = true;
         FirstTimeSignIn = true;
     }
 }

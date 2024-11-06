@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
-[ApiController]
+/*[ApiController]
 [Route("[controller]")]
 public class AssignmentController(IAssignmentRepository assignmentRepository, IClassRepository classRepository, IExerciseSetRepository exerciseSetRepository) : ControllerBase
 {
@@ -85,4 +85,4 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
         
         return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting assignment.");
     }
-}
+}*/

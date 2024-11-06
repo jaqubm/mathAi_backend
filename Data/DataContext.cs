@@ -9,7 +9,7 @@ public class DataContext(IConfiguration config) : DbContext
     public virtual DbSet<Exercise> Exercise { get; set; }
     public virtual DbSet<ExerciseSet> ExerciseSet { get; set; }
     public virtual DbSet<Class> Class { get; set; }
-    public virtual DbSet<ClassStudents> ClassStudent { get; set; }
+    public virtual DbSet<ClassStudent> ClassStudent { get; set; }
     public virtual DbSet<Assignment> Assignment { get; set; }
     public virtual DbSet<AssignmentSubmission> AssignmentSubmission { get; set; }
     public virtual DbSet<ExerciseAnswers> ExerciseAnswers { get; set; }
@@ -70,22 +70,22 @@ public class DataContext(IConfiguration config) : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         // ClassStudents
-        modelBuilder.Entity<ClassStudents>()
+        modelBuilder.Entity<ClassStudent>()
             .HasKey(cs =>  new { cs.ClassId, cs.StudentId });
 
-        modelBuilder.Entity<ClassStudents>()
+        modelBuilder.Entity<ClassStudent>()
             .HasOne(cs => cs.Class)
             .WithMany(c => c.ClassStudents)
             .HasForeignKey(cs => cs.ClassId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<ClassStudents>()
+        modelBuilder.Entity<ClassStudent>()
             .HasOne(cs => cs.Student)
             .WithMany(u => u.StudentClasses)
             .HasForeignKey(cs => cs.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<ClassStudents>()
+        modelBuilder.Entity<ClassStudent>()
             .HasIndex(cs => new { cs.ClassId, cs.StudentId })
             .IsUnique();
 

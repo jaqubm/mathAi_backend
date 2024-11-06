@@ -20,7 +20,7 @@ public class Class
     public string OwnerId { get; set; }
     public virtual User? Owner { get; set; }
 
-    public virtual List<ClassStudents> ClassStudents { get; set; } = [];
+    public virtual List<ClassStudent> ClassStudents { get; set; } = [];
     public virtual List<Assignment> Assignments { get; set; } = [];
 
     public Class()

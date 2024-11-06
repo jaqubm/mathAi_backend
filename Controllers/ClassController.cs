@@ -1,39 +1,50 @@
+using AutoMapper;
 using mathAi_backend.Dtos;
+using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
-/*[ApiController]
+[Authorize]
+[ApiController]
 [Route("[controller]")]
-public class ClassController(IClassRepository classRepository, IUserRepository userRepository) : ControllerBase
+public class ClassController(IClassRepository classRepository) : ControllerBase
 {
-    [HttpPost("Create")]
-    public async Task<ActionResult<string>> CreateClass([FromBody] ClassDto classListDto)
+    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
-        var owner = await userRepository.GetUserByEmailAsync(classListDto.OwnerId);
+        c.CreateMap<Class, ClassDto>();
+        c.CreateMap<User, UserDto>();
+    })); 
+    
+    [HttpPost("Create")]
+    public async Task<ActionResult<string>> CreateClass([FromBody] ClassCreatorDto classCreatorListDto)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await classRepository.GetUserByIdAsync(userId);
         
-        if (owner is null) return Unauthorized("User does not exist.");
-        if (!owner.IsTeacher) return Unauthorized("Only Teacher is allowed to create Class.");
+        if (userDb is null) return Unauthorized();
+        if (!userDb.IsTeacher) return Unauthorized("Only Teacher is allowed to create Class.");
         
         var newClass = new Class
         {
-            Name = classListDto.Name, 
-            OwnerId = classListDto.OwnerId
+            Name = classCreatorListDto.Name, 
+            OwnerId = userId
         };
 
-        foreach (var studentEmail in classListDto.ClassStudents)
+        foreach (var studentId in classCreatorListDto.ClassStudentsIdList)
         {
-            var student = await userRepository.GetUserByEmailAsync(studentEmail);
+            var studentDb = await classRepository.GetUserByIdAsync(studentId);
 
-            if (student is null || student.IsTeacher || owner.Email.Equals(student.Email)) continue;
-            if (newClass.ClassStudents.Exists(c => c.StudentId.Equals(student.Email))) continue;
+            if (studentDb is null || userDb.FirstTimeSignIn || studentDb.IsTeacher || userDb.Email.Equals(studentDb.Email)) continue;
+            if (newClass.ClassStudents.Exists(c => c.StudentId.Equals(studentDb.Email))) continue;
             
-            var classStudent = new ClassStudents
+            var classStudent = new ClassStudent
             {
                 ClassId = newClass.Id,
-                StudentId = student.Email
+                StudentId = studentDb.Id
             };
             
             newClass.ClassStudents.Add(classStudent);
@@ -45,69 +56,102 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
     }
 
     [HttpGet("Get/{classId}")]
-    public async Task<ActionResult<Class>> GetClass([FromRoute] string classId)
+    public async Task<ActionResult<ClassDto>> GetClass([FromRoute] string classId)
     {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await classRepository.GetUserByIdAsync(userId);
+        
+        if (userDb is null) return Unauthorized();
+        
         var classDb = await classRepository.GetClassByIdAsync(classId);
-        
+
         if (classDb is null) return NotFound("Class with given ID not found.");
+        if (!string.Equals(classDb.OwnerId, userId) && !classDb.ClassStudents.Exists(cs => string.Equals(cs.StudentId, userId))) 
+            return Unauthorized("User is not allowed to access this class.");
         
-        return Ok(classDb);
+        var cClass = _mapper.Map<ClassDto>(classDb);
+
+        foreach (var classStudent in classDb.ClassStudents)
+        {
+            var studentDb = await classRepository.GetUserByIdAsync(classStudent.StudentId);
+            if (studentDb is null) continue;
+            cClass.Students.Add(_mapper.Map<UserDto>(studentDb));
+        }
+
+        return Ok(cClass);
     }
-    
+
     [HttpDelete("Delete/{classId}")]
     public async Task<ActionResult<string>> DeleteClass([FromRoute] string classId)
     {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await classRepository.GetUserByIdAsync(userId);
+        
+        if (userDb is null) return Unauthorized();
+        
         var classDb = await classRepository.GetClassByIdAsync(classId);
-        
+
         if (classDb is null) return NotFound("Class with given ID was not found.");
-        
+        if (!string.Equals(classDb.OwnerId, userId)) return Unauthorized("User is not allowed to delete this class.");
+
         classRepository.DeleteEntity(classDb);
-        
+
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while deleting class.");
     }
 
     [HttpPut("AddStudent/{classId}")]
-    public async Task<ActionResult<string>> AddStudent([FromRoute] string classId, [FromBody] string studentEmail)
+    public async Task<ActionResult<string>> AddStudentToClass([FromRoute] string classId, [FromBody] string studentEmail)
     {
-        var userDb = await userRepository.GetUserByEmailAsync(studentEmail);
-        
-        if (userDb is null) return Unauthorized("User does not exist.");
-        if (userDb.IsTeacher) return Unauthorized("Only Student can be added to Class.");
-        
+        var studentDb = await classRepository.GetUserByEmailAsync(studentEmail);
+
+        if (studentDb is null) return Unauthorized("Student account with given email does not exist.");
+        if (studentDb.FirstTimeSignIn) return Unauthorized("Account with given email has not chosen account type yet.");
+        if (studentDb.IsTeacher) return Unauthorized("Only Student can be added to Class.");
+
         var classDb = await classRepository.GetClassByIdAsync(classId);
-        
+
         if (classDb is null) return NotFound("Class with given ID was not found.");
-        if (classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(userDb.Email))) return BadRequest($"Student {userDb.Name} is already a part of {classDb.Name} class.");
-        
-        classDb.ClassStudents.Add(new ClassStudents
+        if (classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(studentDb.Id))) 
+            return BadRequest($"Student {studentDb.Name} is already a part of {classDb.Name} class.");
+
+        classDb.ClassStudents.Add(new ClassStudent
         {
             ClassId = classDb.Id,
-            StudentId = userDb.Email
+            StudentId = studentDb.Id
         });
-        
+
         classRepository.UpdateEntity(classDb);
-        
+
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while adding user to {classDb.Name} class.");
     }
-
+    
     [HttpDelete("RemoveStudent/{classId}")]
-    public async Task<ActionResult<string>> RemoveStudent([FromRoute] string classId, [FromBody] string studentEmail)
+    public async Task<ActionResult<string>> RemoveStudentFromClass([FromRoute] string classId, [FromBody] string studentEmail)
     {
-        var userDb = await userRepository.GetUserByEmailAsync(studentEmail);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await classRepository.GetUserByIdAsync(userId);
         
-        if (userDb is null) return Unauthorized("User does not exist.");
-        if (userDb.IsTeacher) return Unauthorized("Only Student can be removed from Class.");
-        
+        if (userDb is null) return Unauthorized();
+
         var classDb = await classRepository.GetClassByIdAsync(classId);
-        
+
         if (classDb is null) return NotFound("Class with given ID was not found.");
-        if (classDb.OwnerId.Equals(userDb.Email)) return Unauthorized("Only Student can be removed from Class.");
-        if (!classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(userDb.Email))) return NotFound($"Student {userDb.Name} is no part of {classDb.Name} class therefore he can not be removed.");
+        if (!classDb.OwnerId.Equals(userId)) return Unauthorized("Only owner of this class can remove students.");
         
-        classDb.ClassStudents.Remove(classDb.ClassStudents.Find(cs => cs.StudentId.Equals(userDb.Email)) ?? throw new InvalidOperationException());
+        var studentDb = await classRepository.GetUserByEmailAsync(studentEmail);
         
+        if (studentDb is null) return BadRequest("Student account with given email does not exist.");
+        if (classDb.OwnerId.Equals(studentDb.Id)) return BadRequest("Owner can not be removed from class.");
+        if (!classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(studentDb.Id))) return NotFound($"Student {userDb.Name} is no part of {classDb.Name} class therefore he can not be removed.");
+
+        classDb
+            .ClassStudents
+            .Remove(classDb.ClassStudents
+                .Find(cs => cs.StudentId.Equals(studentDb.Id)) 
+                    ?? throw new InvalidOperationException());
+
         classRepository.UpdateEntity(classDb);
-        
+
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while removing user from {classDb.Name} class.");
     }
-}*/
+}

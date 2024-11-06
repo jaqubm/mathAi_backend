@@ -31,40 +31,26 @@ public class ClassRepository(IConfiguration config) : IClassRepository
             _entityFramework.Remove(entity);
     }
 
-    public async Task<Class?> GetClassByIdAsync(string id)
+    public async Task<User?> GetUserByIdAsync(string userId)
+    {
+        return await _entityFramework
+            .User
+            .FindAsync(userId);
+    }
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _entityFramework
+            .User
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<Class?> GetClassByIdAsync(string classId)
     {
         return await _entityFramework
             .Class
             .Include(c => c.ClassStudents)
             .Include(c => c.Assignments)
-            .FirstOrDefaultAsync(c => c.Id == id);
-    }
-
-    public async Task<List<Class>> GetClassesByOwnerIdAsync(string id)
-    {
-        return await _entityFramework
-            .Class
-            .Include(c => c.ClassStudents)
-            .Where(c => c.OwnerId == id)
-            .ToListAsync();
-    }
-
-    public async Task<List<Class>> GetClassesByStudentIdAsync(string id)
-    {
-        var classIdsList = await _entityFramework
-            .ClassStudent
-            .Where(cs => cs.StudentId == id).Select(cs => cs.ClassId)
-            .ToListAsync();
-        
-        var studentClasses = new List<Class>();
-
-        foreach (var classId in classIdsList)
-        {
-            var classDb = await GetClassByIdAsync(classId);
-            if (classDb is null) continue;
-            studentClasses.Add(classDb);
-        }
-
-        return studentClasses;
+            .FirstOrDefaultAsync(c => c.Id == classId);
     }
 }
