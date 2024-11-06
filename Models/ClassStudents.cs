@@ -12,7 +12,7 @@ public class ClassStudents
     public virtual Class? Class { get; set; }
 
     [Required]
-    [MaxLength(255)]
+    [MaxLength(21)]
     [ForeignKey("StudentId")]
     public string StudentId { get; set; }
     public virtual User? Student { get; set; }

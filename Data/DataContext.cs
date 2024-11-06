@@ -31,12 +31,17 @@ public class DataContext(IConfiguration config) : DbContext
     {
         modelBuilder.HasDefaultSchema("mathAi");
 
-        // User and ExerciseSet
+        // User Entity
         modelBuilder.Entity<User>()
-            .HasKey(u => u.Email);
+            .HasKey(u => u.Id);
 
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        // ExerciseSet and User
         modelBuilder.Entity<ExerciseSet>()
-            .HasKey(e => e.Id);
+            .HasKey(es => es.Id);
 
         modelBuilder.Entity<ExerciseSet>()
             .HasOne(es => es.User)
@@ -44,13 +49,17 @@ public class DataContext(IConfiguration config) : DbContext
             .HasForeignKey(es => es.UserId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Exercise and ExerciseSet
+        modelBuilder.Entity<Exercise>()
+            .HasKey(e => e.Id);
+
         modelBuilder.Entity<Exercise>()
             .HasOne(e => e.ExerciseSet)
             .WithMany(es => es.Exercises)
             .HasForeignKey(e => e.ExerciseSetId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Class and ClassStudents
+        // Class and User
         modelBuilder.Entity<Class>()
             .HasKey(c => c.Id);
 
@@ -60,8 +69,9 @@ public class DataContext(IConfiguration config) : DbContext
             .HasForeignKey(c => c.OwnerId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // ClassStudents
         modelBuilder.Entity<ClassStudents>()
-            .HasKey(cs => new { cs.ClassId, cs.StudentId });
+            .HasKey(cs =>  new { cs.ClassId, cs.StudentId });
 
         modelBuilder.Entity<ClassStudents>()
             .HasOne(cs => cs.Class)
@@ -74,6 +84,10 @@ public class DataContext(IConfiguration config) : DbContext
             .WithMany(u => u.StudentClasses)
             .HasForeignKey(cs => cs.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ClassStudents>()
+            .HasIndex(cs => new { cs.ClassId, cs.StudentId })
+            .IsUnique();
 
         // Assignment
         modelBuilder.Entity<Assignment>()
@@ -91,7 +105,7 @@ public class DataContext(IConfiguration config) : DbContext
             .HasForeignKey(a => a.ExerciseSetId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // AssignmentSubmission and ExerciseAnswer
+        // AssignmentSubmission
         modelBuilder.Entity<AssignmentSubmission>()
             .HasKey(sub => sub.Id);
 
@@ -105,8 +119,9 @@ public class DataContext(IConfiguration config) : DbContext
             .HasOne(sub => sub.Student)
             .WithMany(u => u.AssignmentSubmissions)
             .HasForeignKey(sub => sub.StudentId)
-            .OnDelete(DeleteBehavior.Restrict);  // Prevent multiple cascade paths
+            .OnDelete(DeleteBehavior.Restrict);
 
+        // ExerciseAnswers
         modelBuilder.Entity<ExerciseAnswers>()
             .HasKey(ea => ea.Id);
 
@@ -120,6 +135,6 @@ public class DataContext(IConfiguration config) : DbContext
             .HasOne(ea => ea.Exercise)
             .WithMany(e => e.ExerciseAnswers)
             .HasForeignKey(ea => ea.ExerciseId)
-            .OnDelete(DeleteBehavior.Restrict);  // Prevent multiple cascade paths
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

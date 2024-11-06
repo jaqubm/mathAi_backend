@@ -15,7 +15,7 @@ public class Class
     public string Name { get; set; }
     
     [Required]
-    [MaxLength(255)]
+    [MaxLength(21)]
     [ForeignKey("OwnerId")]
     public string OwnerId { get; set; }
     public virtual User? Owner { get; set; }

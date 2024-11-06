@@ -10,12 +10,12 @@ public class OpenAiHelper(IConfiguration config)
         return new ChatClient(model: "gpt-4o", apiKey: config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
     }
     
-    public static string GenerateExerciseSetPrompt(ExerciseSetGeneratorDto exerciseSetGenerator)
+    public static string GenerateExerciseSetPrompt(ExerciseSetSettingsDto exerciseSetSettings)
     {
         return $"Wygeneruj zadanie z Matematyki, wraz z trzema podpowiedziami oraz odpowiedzią dla ucznia " +
-               $"ze szkoły: {exerciseSetGenerator.SchoolType}, " +
-               $"klasa: {exerciseSetGenerator.Grade}, " +
-               $"o tematyce: {exerciseSetGenerator.Subject}. " + 
+               $"ze szkoły: {exerciseSetSettings.SchoolType}, " +
+               $"klasa: {exerciseSetSettings.Grade}, " +
+               $"o tematyce: {exerciseSetSettings.Subject}. " + 
                $"Zadanie powinno być ciekawe i rozbudowane.\n" + 
                ExerciseAnswerFormat();
     }

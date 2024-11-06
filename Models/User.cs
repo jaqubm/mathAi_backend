@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace mathAi_backend.Models;
 
 public class User
 {
     [Key]
+    [Required]
+    [MaxLength(21)]
+    public string Id { get; set; }
+    
     [Required]
     [MaxLength(255)]
     public string Email { get; set; }
@@ -27,6 +30,7 @@ public class User
 
     public User()
     {
+        Id ??= string.Empty;
         Email ??= string.Empty;
         Name ??= string.Empty;
         IsTeacher = false;

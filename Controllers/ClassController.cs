@@ -5,25 +5,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
-[ApiController]
+/*[ApiController]
 [Route("[controller]")]
 public class ClassController(IClassRepository classRepository, IUserRepository userRepository) : ControllerBase
 {
     [HttpPost("Create")]
-    public async Task<ActionResult<string>> CreateClass([FromBody] ClassDto classDto)
+    public async Task<ActionResult<string>> CreateClass([FromBody] ClassDto classListDto)
     {
-        var owner = await userRepository.GetUserByEmailAsync(classDto.OwnerId);
+        var owner = await userRepository.GetUserByEmailAsync(classListDto.OwnerId);
         
         if (owner is null) return Unauthorized("User does not exist.");
         if (!owner.IsTeacher) return Unauthorized("Only Teacher is allowed to create Class.");
         
         var newClass = new Class
         {
-            Name = classDto.Name, 
-            OwnerId = classDto.OwnerId
+            Name = classListDto.Name, 
+            OwnerId = classListDto.OwnerId
         };
 
-        foreach (var studentEmail in classDto.ClassStudents)
+        foreach (var studentEmail in classListDto.ClassStudents)
         {
             var student = await userRepository.GetUserByEmailAsync(studentEmail);
 
@@ -110,4 +110,4 @@ public class ClassController(IClassRepository classRepository, IUserRepository u
         
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while removing user from {classDb.Name} class.");
     }
-}
+}*/

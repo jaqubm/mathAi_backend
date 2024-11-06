@@ -31,6 +31,16 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
             _entityFramework.Remove(entity);
     }
 
+    public async Task<int> GetUserExerciseSetsCountAsync(string userId)
+    {
+        var userExerciseSetsCount = await _entityFramework.
+            ExerciseSet
+            .Where(es => es.UserId == userId)
+            .CountAsync();
+        
+        return userExerciseSetsCount;
+    }
+
     public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)
     {
         return await _entityFramework

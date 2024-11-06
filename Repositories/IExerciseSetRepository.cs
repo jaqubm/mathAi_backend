@@ -10,5 +10,6 @@ public interface IExerciseSetRepository
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
+    public Task<int> GetUserExerciseSetsCountAsync(string userId);
     public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
 }
