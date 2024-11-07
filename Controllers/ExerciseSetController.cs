@@ -22,6 +22,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         c.CreateMap<ExerciseSetDto, ExerciseSet>();
         c.CreateMap<ExerciseSet, ExerciseSetDto>();
         c.CreateMap<Exercise, ExerciseDto>();
+        c.CreateMap<ExerciseDto, Exercise>();
     })); 
     
     [AllowAnonymous]
@@ -126,6 +127,18 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         var exerciseSet = _mapper.Map<ExerciseSetDto>(exerciseSetDb);
         
         return Ok(exerciseSet);
+    }
+
+    [HttpGet("CanEdit/{exerciseSetId}")]
+    public async Task<ActionResult<bool>> CanEditExerciseSet([FromRoute] string exerciseSetId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
+        
+        if (exerciseSetDb is null)
+            return NotFound($"Could not find exercise set with id {exerciseSetId}.");
+        
+        return userId == exerciseSetDb.UserId;
     }
 
     [HttpPut("Update/{exerciseSetId}")]

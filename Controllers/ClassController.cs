@@ -34,9 +34,9 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
             OwnerId = userId
         };
 
-        foreach (var studentId in classCreatorListDto.ClassStudentsIdList)
+        foreach (var studentEmail in classCreatorListDto.StudentEmailList)
         {
-            var studentDb = await classRepository.GetUserByIdAsync(studentId);
+            var studentDb = await classRepository.GetUserByEmailAsync(studentEmail);
 
             if (studentDb is null || userDb.FirstTimeSignIn || studentDb.IsTeacher || userDb.Email.Equals(studentDb.Email)) continue;
             if (newClass.ClassStudents.Exists(c => c.StudentId.Equals(studentDb.Email))) continue;

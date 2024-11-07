@@ -9,9 +9,9 @@ public interface IUserRepository
     public void UpdateEntity<T>(T entity);
 
     public Task<User?> GetUserByIdAsync(string userId);
-    public Task<bool> CheckIfUserExistsByEmailAsync(string email);
+    public Task<User?> GetUserByEmailAsync(string email);
     
-    public Task<List<ExerciseSet>> GetExerciseSetsListByUserIdAsync(string userId);
+    public Task<List<ExerciseSet>> GetExerciseSetListByUserIdAsync(string userId);
     
     public Task<List<Class>> GetClassListByOwnerIdAsync(string ownerId);
     public Task<List<Class>> GetClassListByStudentIdAsync(string userId);

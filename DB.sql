@@ -133,7 +133,7 @@ CREATE TABLE mathAi.[ExerciseAnswer]
 );
 
 
-DROP TABLE mathAi.[ExerciseAnswers];
+DROP TABLE mathAi.[ExerciseAnswer];
 DROP TABLE mathAi.[AssignmentSubmission];
 DROP TABLE mathAi.[Assignment];
 DROP TABLE mathAi.[ClassStudent];

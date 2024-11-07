@@ -33,20 +33,37 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         
         return Ok(user);
     }
-    
-    [HttpGet("Exist/{email}")]
-    public async Task<ActionResult<bool>> GetUserExists([FromRoute] string email)
+
+    [HttpGet("GetExistsAndIsStudent/{email}")]
+    public async Task<ActionResult<bool>> GetUserExistsAndIsStudent(string email)
     {
-        var userExists = await userRepository.CheckIfUserExistsByEmailAsync(email);
+        var userDb = await userRepository.GetUserByEmailAsync(email);
+
+        return Ok(userDb is not null && !userDb.IsTeacher);
+    }
+    
+    [HttpPut("UpdateAccountType")]
+    public async Task<IActionResult> UpdateUserAccountType([FromBody] bool isTeacher)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await userRepository.GetUserByIdAsync(userId);
         
-        return Ok(userExists);
+        if (userDb is null)
+            return Unauthorized("User does not exist!");
+        
+        userDb.IsTeacher = isTeacher;
+        userDb.FirstTimeSignIn = false;
+        
+        userRepository.UpdateEntity(userDb);
+        
+        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update user account type.");
     }
 
-    [HttpGet("GetExerciseSetsList")]
+    [HttpGet("GetExerciseSetList")]
     public async Task<ActionResult<List<ExerciseSetListDto>>> GetUserExerciseSetsList()
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
-        var exerciseSetsListDb = await userRepository.GetExerciseSetsListByUserIdAsync(userId);
+        var exerciseSetsListDb = await userRepository.GetExerciseSetListByUserIdAsync(userId);
         
         var exerciseSetsList = _mapper.Map<List<ExerciseSetListDto>>(exerciseSetsListDb);
         
@@ -96,21 +113,4 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         
         return Ok(sortedAssignmentSubmissions);
     }*/
-    
-    [HttpPut("UpdateAccountType")]
-    public async Task<IActionResult> UpdateUserAccountType([FromBody] bool isTeacher)
-    {
-        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
-        var userDb = await userRepository.GetUserByIdAsync(userId);
-        
-        if (userDb is null)
-            return Unauthorized("User does not exist!");
-        
-        userDb.IsTeacher = isTeacher;
-        userDb.FirstTimeSignIn = false;
-        
-        userRepository.UpdateEntity(userDb);
-        
-        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update user account type.");
-    }
 }

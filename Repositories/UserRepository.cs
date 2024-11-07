@@ -26,16 +26,16 @@ public class UserRepository(IConfiguration config) : IUserRepository
             .FindAsync(userId);
     }
 
-    public async Task<bool> CheckIfUserExistsByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         var userDb = await _entityFramework
             .User
             .FirstOrDefaultAsync(u => u.Email == email);
 
-        return userDb is not null;
+        return userDb;
     }
 
-    public async Task<List<ExerciseSet>> GetExerciseSetsListByUserIdAsync(string userId)
+    public async Task<List<ExerciseSet>> GetExerciseSetListByUserIdAsync(string userId)
     {
         var listOfExerciseSets = await _entityFramework
             .ExerciseSet
