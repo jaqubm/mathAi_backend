@@ -1,5 +1,3 @@
-using mathAi_backend.Models;
-
 namespace mathAi_backend.Dtos;
 
 public class ExerciseSetDto
@@ -8,6 +6,6 @@ public class ExerciseSetDto
     public string SchoolType { get; set; } = string.Empty;
     public int Grade { get; set; }
     public string Subject { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
-    public List<ExerciseDto> Exercises { get; set; } = [];
+    public bool IsOwner { get; set; }
+    public IEnumerable<ExerciseDto> Exercises { get; set; } = [];
 }

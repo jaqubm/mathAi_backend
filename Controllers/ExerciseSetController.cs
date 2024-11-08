@@ -119,26 +119,26 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
     [HttpGet("Get/{exerciseSetId}")]
     public async Task<ActionResult<ExerciseSetDto>> GetExerciseSet([FromRoute] string exerciseSetId)
     {
+        string? userId;
+
+        try
+        {
+            userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        }
+        catch
+        {
+            userId = null;
+        }
+        
         var exerciseSetDb = await exerciseSetRepository
             .GetExerciseSetByIdAsync(exerciseSetId);
         
         if (exerciseSetDb is null) return NotFound($"Could not find exercise set with id {exerciseSetId}.");
         
         var exerciseSet = _mapper.Map<ExerciseSetDto>(exerciseSetDb);
+        if (exerciseSetDb.UserId is not null && exerciseSetDb.UserId.Equals(userId)) exerciseSet.IsOwner = true;
         
         return Ok(exerciseSet);
-    }
-
-    [HttpGet("CanEdit/{exerciseSetId}")]
-    public async Task<ActionResult<bool>> CanEditExerciseSet([FromRoute] string exerciseSetId)
-    {
-        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
-        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
-        
-        if (exerciseSetDb is null)
-            return NotFound($"Could not find exercise set with id {exerciseSetId}.");
-        
-        return userId == exerciseSetDb.UserId;
     }
 
     [HttpPut("Update/{exerciseSetId}")]

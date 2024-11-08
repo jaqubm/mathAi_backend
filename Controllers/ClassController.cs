@@ -70,6 +70,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
             return Unauthorized("User is not allowed to access this class.");
         
         var cClass = _mapper.Map<ClassDto>(classDb);
+        if (classDb.OwnerId.Equals(userId)) cClass.IsOwner = true;
 
         foreach (var classStudent in classDb.ClassStudents)
         {
