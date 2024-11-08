@@ -85,6 +85,57 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         }
     }
     
+    [HttpPut("GenerateAdditionalExercise/{exerciseSetId}")]
+    public async Task<ActionResult<ExerciseSet>> GenerateAdditionalExercise([FromRoute] string exerciseSetId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        
+        try
+        {
+            var client = _openAiHelper.CreateChatClient();
+
+            var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
+
+            if (exerciseSetDb is null)
+                return NotFound($"Could not find exercise set with id {exerciseSetId}");
+
+            if (!string.Equals(exerciseSetDb.UserId, userId))
+                return Unauthorized("You don't have permission to generate additional exercise for this exercise set.");
+
+            var exerciseSetGenerator = new ExerciseSetSettingsDto
+            {
+                SchoolType = exerciseSetDb.SchoolType,
+                Grade = exerciseSetDb.Grade,
+                Subject = exerciseSetDb.Subject,
+                NumberOfExercises = 1,
+            };
+
+            for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
+            {
+                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
+
+                try
+                {
+                    var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSetDb.Id);
+
+                    exerciseSetDb.Exercises.Add(exercise);
+                }
+                catch
+                {
+                    i--;
+                }
+            }
+
+            exerciseSetRepository.UpdateEntity(exerciseSetDb);
+
+            return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to generate additional exercise and add it to the exercise set.");
+        }
+        catch (Exception e)
+        {
+            return Problem(e.Message, statusCode: 500);
+        }
+    }
+    
     [HttpPost("Copy/{exerciseSetId}")]
     public async Task<ActionResult<ExerciseSet>> CopyExerciseSet([FromRoute] string exerciseSetId)
     {
@@ -159,54 +210,19 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update exercise set.");
     }
 
-    [HttpPut("GenerateAdditionalExercise/{exerciseSetId}")]
-    public async Task<ActionResult<ExerciseSet>> GenerateAdditionalExercise([FromRoute] string exerciseSetId)
+    [HttpDelete("Delete/{exerciseSetId}")]
+    public async Task<ActionResult> DeleteExerciseSet([FromRoute] string exerciseSetId)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
         
-        try
-        {
-            var client = _openAiHelper.CreateChatClient();
-
-            var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
-
-            if (exerciseSetDb is null)
-                return NotFound($"Could not find exercise set with id {exerciseSetId}");
-
-            if (!string.Equals(exerciseSetDb.UserId, userId))
-                return Unauthorized("You don't have permission to generate additional exercise for this exercise set.");
-
-            var exerciseSetGenerator = new ExerciseSetSettingsDto
-            {
-                SchoolType = exerciseSetDb.SchoolType,
-                Grade = exerciseSetDb.Grade,
-                Subject = exerciseSetDb.Subject,
-                NumberOfExercises = 1,
-            };
-
-            for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
-            {
-                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
-
-                try
-                {
-                    var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSetDb.Id);
-
-                    exerciseSetDb.Exercises.Add(exercise);
-                }
-                catch
-                {
-                    i--;
-                }
-            }
-
-            exerciseSetRepository.UpdateEntity(exerciseSetDb);
-
-            return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to generate additional exercise and add it to the exercise set.");
-        }
-        catch (Exception e)
-        {
-            return Problem(e.Message, statusCode: 500);
-        }
+        if (exerciseSetDb is null)
+            return NotFound($"Could not find exercise set with id {exerciseSetId}.");
+        
+        if (!string.Equals(exerciseSetDb.UserId, userId)) return Unauthorized("You are not authorized to delete this exercise set.");
+        
+        exerciseSetRepository.DeleteEntity(exerciseSetDb);
+        
+        return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to delete exercise set.");
     }
 }
