@@ -17,6 +17,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
     {
         c.CreateMap<Class, ClassDto>();
         c.CreateMap<User, UserDto>();
+        c.CreateMap<Assignment, AssignmentListDto>();
     })); 
     
     [HttpPost("Create")]

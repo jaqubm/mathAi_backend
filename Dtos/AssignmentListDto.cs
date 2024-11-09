@@ -1,6 +1,6 @@
 namespace mathAi_backend.Dtos;
 
-public class AssignmentDto
+public class AssignmentListDto
 {
     public string Name { get; set; } = string.Empty;
     public DateTime StartDate { get; set; } = DateTime.Today;

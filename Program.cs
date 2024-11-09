@@ -106,7 +106,7 @@ builder.Services
 // Adding scoped connection between Repositories Interfaces and Repositories Classes
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-//builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseSetRepository, ExerciseSetRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
