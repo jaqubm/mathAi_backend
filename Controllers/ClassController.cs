@@ -82,6 +82,24 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
 
         return Ok(cClass);
     }
+    
+    [HttpPut("UpdateName/{classId}")]
+    public async Task<ActionResult<ExerciseSet>> UpdateClassName([FromRoute] string classId, [FromBody] string className)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var classDb = await classRepository.GetClassByIdAsync(classId);
+
+        if (classDb is null)
+            return NotFound($"Could not find class with id {classId}.");
+        
+        if (!string.Equals(classDb.OwnerId, userId)) return Unauthorized("You are not authorized to update name of this class.");
+
+        classDb.Name = className;
+
+        classRepository.UpdateEntity(classDb);
+
+        return await classRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update name of class.");
+    }
 
     [HttpDelete("Delete/{classId}")]
     public async Task<ActionResult<string>> DeleteClass([FromRoute] string classId)

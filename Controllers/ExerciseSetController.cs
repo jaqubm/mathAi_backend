@@ -193,7 +193,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
     }
 
     [HttpPut("UpdateName/{exerciseSetId}")]
-    public async Task<ActionResult<ExerciseSet>> UpdateExerciseSet([FromRoute] string exerciseSetId, [FromBody] string exerciseSetName)
+    public async Task<ActionResult<ExerciseSet>> UpdateExerciseSetName([FromRoute] string exerciseSetId, [FromBody] string exerciseSetName)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);

@@ -49,7 +49,7 @@ CREATE TABLE mathAi.[Exercise]
 CREATE TABLE mathAi.[Class]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the class
-    Name NVARCHAR(255) NOT NULL,                -- Name of the class
+    Name NVARCHAR(30) NOT NULL,                -- Name of the class
     OwnerId NVARCHAR(21) NOT NULL,              -- Foreign key linking the class to the teacher (User)
 
     CONSTRAINT FK_User_Class_Owner FOREIGN KEY (OwnerId)
@@ -79,7 +79,7 @@ CREATE TABLE mathAi.[ClassStudent]
 CREATE TABLE mathAi.[Assignment]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the assignment
-    Name NVARCHAR(255) NOT NULL,                -- Name of the assignment
+    Name NVARCHAR(30) NOT NULL,                -- Name of the assignment
     StartDate DATE NOT NULL,                    -- Start date of the assignment
     DueDate DATE NOT NULL,                      -- Due date of the assignment
     ClassId NVARCHAR(50) NOT NULL,              -- Foreign key linking the assignment to a class
