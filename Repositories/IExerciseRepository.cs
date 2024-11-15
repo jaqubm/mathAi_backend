@@ -10,4 +10,5 @@ public interface IExerciseRepository
     public void DeleteEntity<T>(T entity);
     
     public Task<Exercise?> GetExerciseByIdAsync(string exerciseId);
+    public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
 }

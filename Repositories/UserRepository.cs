@@ -13,58 +13,59 @@ public class UserRepository(IConfiguration config) : IUserRepository
         return await _entityFramework.SaveChangesAsync() > 0;
     }
 
-    public async Task AddEntityAsync<T>(T entity)
-    {
-        if (entity is not null)
-            await _entityFramework.AddAsync(entity);
-    }
-
     public void UpdateEntity<T>(T entity)
     {
         if (entity is not null)
             _entityFramework.Update(entity);
     }
 
-    public async Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByIdAsync(string userId)
     {
         return await _entityFramework
             .User
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FindAsync(userId);
     }
 
-    public async Task<bool> UserExistAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         var userDb = await _entityFramework
             .User
-            .FirstOrDefaultAsync(user => user.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
 
-        return userDb is not null;
+        return userDb;
     }
 
-    public async Task<int> UserExerciseSetsCountAsync(User user)
+    public async Task<List<ExerciseSet>> GetExerciseSetListByUserIdAsync(string userId)
     {
-        return await _entityFramework
+        var listOfExerciseSets = await _entityFramework
             .ExerciseSet
-            .CountAsync(e => e.UserId == user.Email);
-    }
-    
-    public async Task<List<ExerciseSet>> GetUsersExerciseSetsByEmailAsync(string email)
-    {
-        var userWithExerciseSets = await _entityFramework
-            .User
-            .Include(u => u.ExerciseSets)
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .Where(s => s.UserId == userId)
+            .ToListAsync();
         
-        return userWithExerciseSets?.ExerciseSets as List<ExerciseSet> ?? [];
+        return listOfExerciseSets;
     }
 
-    public async Task<List<AssignmentSubmission>> GetAssignmentSubmissionsByEmailAsync(string email)
+    public async Task<List<Class>> GetClassListByOwnerIdAsync(string ownerId)
     {
-        var userWithAssignmentSubmissions = await _entityFramework
-            .User
-            .Include(u => u.AssignmentSubmissions)
-            .FirstOrDefaultAsync(u => u.Email == email);
+        var classList = await _entityFramework
+            .Class
+            .Include(c => c.Owner)
+            .Include(c => c.ClassStudents)
+            .Where(c => c.OwnerId == ownerId)
+            .ToListAsync();
         
-        return userWithAssignmentSubmissions?.AssignmentSubmissions as List<AssignmentSubmission> ?? [];
+        return classList;
+    }
+
+    public async Task<List<Class>> GetClassListByStudentIdAsync(string userId)
+    {
+        var classList = await _entityFramework
+            .Class
+            .Include(c => c.Owner)
+            .Include(c => c.ClassStudents)
+            .Where(c => c.ClassStudents.Any(s => s.StudentId == userId))
+            .ToListAsync();
+        
+        return classList;
     }
 }

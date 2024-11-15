@@ -6,13 +6,13 @@ public interface IUserRepository
 {
     public Task<bool> SaveChangesAsync();
     
-    public Task AddEntityAsync<T>(T entity);
     public void UpdateEntity<T>(T entity);
 
+    public Task<User?> GetUserByIdAsync(string userId);
     public Task<User?> GetUserByEmailAsync(string email);
-    public Task<bool> UserExistAsync(string email);
-
-    public Task<int> UserExerciseSetsCountAsync(User user);
-    public Task<List<ExerciseSet>> GetUsersExerciseSetsByEmailAsync(string email);
-    public Task<List<AssignmentSubmission>> GetAssignmentSubmissionsByEmailAsync(string email);
+    
+    public Task<List<ExerciseSet>> GetExerciseSetListByUserIdAsync(string userId);
+    
+    public Task<List<Class>> GetClassListByOwnerIdAsync(string ownerId);
+    public Task<List<Class>> GetClassListByStudentIdAsync(string userId);
 }

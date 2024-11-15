@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace mathAi_backend.Models;
 
 public class User
 {
     [Key]
+    [Required]
+    [MaxLength(21)]
+    public string Id { get; set; }
+    
     [Required]
     [MaxLength(255)]
     public string Email { get; set; }
@@ -22,14 +25,15 @@ public class User
 
     public virtual ICollection<ExerciseSet> ExerciseSets { get; set; } = [];
     public virtual ICollection<Class> Classes { get; set; } = [];
-    public virtual ICollection<ClassStudents> StudentClasses { get; set; } = [];
+    public virtual ICollection<ClassStudent> StudentClasses { get; set; } = [];
     public virtual ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; } = [];
 
     public User()
     {
+        Id ??= string.Empty;
         Email ??= string.Empty;
         Name ??= string.Empty;
-        IsTeacher = false;
+        IsTeacher = true;
         FirstTimeSignIn = true;
     }
 }

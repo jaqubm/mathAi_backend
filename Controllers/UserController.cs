@@ -1,150 +1,98 @@
-using System.Text.RegularExpressions;
 using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
-public partial class UserController(IUserRepository userRepository, IClassRepository classRepository, IAssignmentRepository assignmentRepository) : ControllerBase
+public class UserController(IUserRepository userRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
-        c.CreateMap<ExerciseSet, ExerciseSetDto>();
-        c.CreateMap<Class, ClassDto>();
+        c.CreateMap<User, UserDto>();
+        c.CreateMap<ExerciseSet, ExerciseSetListDto>();
+        c.CreateMap<Class, ClassListDto>();
     })); 
-    
-    [GeneratedRegex(@"\d+")]
-    private static partial Regex ExerciseSetNameRegex();
-    
-    private static int ExtractExerciseSetNumber(string exerciseSetName)
-    {
-        var match = ExerciseSetNameRegex().Match(exerciseSetName);
-        return match.Success ? int.Parse(match.Value) : int.MaxValue;
-    }
-    
-    [HttpPost("SignIn")]
-    public async Task<IActionResult> SignIn([FromBody] string idToken)
-    {
-        if (string.IsNullOrEmpty(idToken))
-            return Unauthorized("Access token is required.");
 
-        try
-        {
-            var user = await AuthHelper.GetUserFromGoogleToken(idToken);
-            
-            if (await userRepository.UserExistAsync(user.Email)) return Ok();
-        
-            await userRepository.AddEntityAsync(user);
-            
-            return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to add user to database.");
-        }
-        catch (Exception e)
-        {
-            return Unauthorized(e.Message);
-        }
-    }
-    
-    [HttpGet("Exist/{email}")]
-    public async Task<ActionResult<bool>> UserExists([FromRoute] string email)
+    [HttpGet("Get")]
+    public async Task<ActionResult<UserDto>> GetUser()
     {
-        return Ok(await userRepository.UserExistAsync(email));
-    }
-
-    [HttpGet("FirstTimeSignIn/{email}")]
-    public async Task<ActionResult<bool>> FirstTimeSignIn([FromRoute] string email)
-    {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await userRepository.GetUserByIdAsync(userId);
         
         if (userDb is null)
             return NotFound("User not found.");
         
-        return Ok(userDb.FirstTimeSignIn);
+        var user = _mapper.Map<UserDto>(userDb);
+        
+        return Ok(user);
     }
 
-    [HttpGet("IsTeacher/{email}")]
-    public async Task<ActionResult<bool>> IsTeacher([FromRoute] string email)
+    [HttpGet("GetExistsAndIsStudent/{email}")]
+    public async Task<ActionResult<bool>> GetUserExistsAndIsStudent(string email)
     {
         var userDb = await userRepository.GetUserByEmailAsync(email);
-        
-        if (userDb is null)
-            return NotFound("User not found.");
+
+        return Ok(userDb is not null && !userDb.IsTeacher);
+    }
     
-        return Ok(userDb.IsTeacher);
-    }
-
-    [HttpPut("UpdateToTeacher/{email}")]
-    public async Task<ActionResult> UpdateToTeacher([FromRoute] string email)
+    [HttpPut("UpdateAccountType")]
+    public async Task<IActionResult> UpdateUserAccountType([FromBody] bool isTeacher)
     {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await userRepository.GetUserByIdAsync(userId);
         
         if (userDb is null)
-            return NotFound("User not found.");
+            return Unauthorized("User does not exist!");
         
-        userDb.IsTeacher = true;
+        userDb.IsTeacher = isTeacher;
         userDb.FirstTimeSignIn = false;
-
+        
         userRepository.UpdateEntity(userDb);
         
-        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update account to teacher account.");
+        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update user account type.");
     }
-    
-    [HttpPut("UpdateToStudent/{email}")]
-    public async Task<ActionResult> UpdateToStudent([FromRoute] string email)
+
+    [HttpGet("GetExerciseSetList")]
+    public async Task<ActionResult<List<ExerciseSetListDto>>> GetUserExerciseSetsList()
     {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var exerciseSetsListDb = await userRepository.GetExerciseSetListByUserIdAsync(userId);
+        
+        var exerciseSetsList = _mapper.Map<List<ExerciseSetListDto>>(exerciseSetsListDb);
+        
+        return Ok(exerciseSetsList);
+    }
+
+    [HttpGet("GetClassList")]
+    public async Task<ActionResult<List<ClassListDto>>> GetUserClassList()
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await userRepository.GetUserByIdAsync(userId);
         
         if (userDb is null)
-            return NotFound("User not found.");
+            return Unauthorized("User does not exist!");
         
-        userDb.IsTeacher = false;
-        userDb.FirstTimeSignIn = false;
-
-        userRepository.UpdateEntity(userDb);
-        
-        return await userRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update account to student account.");
-    }
-
-    [HttpGet("GetExerciseSets/{email}")]
-    public async Task<ActionResult<List<ExerciseSetDto>>> GetExerciseSets([FromRoute] string email)
-    {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
-        
-        if (userDb is null)
-            return NotFound("User not found.");
-
-        var exerciseSets = await userRepository.GetUsersExerciseSetsByEmailAsync(email);
-        
-        var sortedExerciseSets = exerciseSets
-            .OrderBy(x => ExtractExerciseSetNumber(x.Name))
-            .Select(x => _mapper.Map<ExerciseSetDto>(x))
-            .ToList();
-        
-        return Ok(sortedExerciseSets);
-    }
-    
-    [HttpGet("GetClasses/{email}")]
-    public async Task<ActionResult<List<Class>>> GetClasses([FromRoute] string email)
-    {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
-        
-        if (userDb is null) 
-            return NotFound("User not found.");
-
-        var userClasses = userDb.IsTeacher switch
+        var classListDb = userDb.IsTeacher switch
         {
-            true => classRepository.GetClassesByOwnerIdAsync(userDb.Email),
-            false => classRepository.GetClassesByStudentIdAsync(userDb.Email)
+            true => await userRepository.GetClassListByOwnerIdAsync(userId),
+            false => await userRepository.GetClassListByStudentIdAsync(userId)
         };
-
-        return Ok(userClasses);
+        
+        var classList = _mapper.Map<List<ClassListDto>>(classListDb);
+        
+        classList.ForEach(cl => cl.IsOwner = classListDb.Find(c => c.Id == cl.Id)?.Owner?.Id == userId);
+        
+        return Ok(classList);
     }
 
-    [HttpGet("GetAssignmentSubmissions/{email}")]
+    /*[HttpGet("GetAssignmentSubmissions/{email}")]
     public async Task<ActionResult<List<AssignmentSubmission>>> GetAssignmentSubmissions([FromRoute] string email)
     {
         var userDb = await userRepository.GetUserByEmailAsync(email);
@@ -166,5 +114,5 @@ public partial class UserController(IUserRepository userRepository, IClassReposi
             .ToList();
         
         return Ok(sortedAssignmentSubmissions);
-    }
+    }*/
 }

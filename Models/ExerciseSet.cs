@@ -11,7 +11,7 @@ public class ExerciseSet
     public string Id { get; set; }
     
     [Required]
-    [MaxLength(255)]
+    [MaxLength(30)]
     public string Name { get; set; }
     
     [Required]
@@ -25,7 +25,7 @@ public class ExerciseSet
     [MaxLength(255)]
     public string Subject { get; set; }
     
-    [MaxLength(255)]
+    [MaxLength(21)]
     [ForeignKey("UserId")]
     public string? UserId { get; set; }
     public virtual User? User { get; set; }

@@ -31,6 +31,18 @@ jobs:
           $fileContent = Get-Content -Path "./appsettings.json"
           $fileContent = $fileContent -replace '"OpenAiApiKey": "KEY"', '"OpenAiApiKey": "${{ secrets.OPENAI_API_KEY }}"'
           Set-Content -Path "./appsettings.json" -Value $fileContent
+          
+      - name: Inject Google Client ID into appsettings.json
+        run: |
+          $fileContent = Get-Content -Path "./appsettings.json"
+          $fileContent = $fileContent -replace '"GoogleClientId": "ID"', '"GoogleClientId": "${{ secrets.GOOGLE_CLIENT_ID }}"'
+          Set-Content -Path "./appsettings.json" -Value $fileContent
+          
+      - name: Inject Google Client Secret into appsettings.json
+        run: |
+          $fileContent = Get-Content -Path "./appsettings.json"
+          $fileContent = $fileContent -replace '"GoogleClientSecret": "SECRET"', '"GoogleClientSecret": "${{ secrets.GOOGLE_CLIENT_SECRET }}"'
+          Set-Content -Path "./appsettings.json" -Value $fileContent
 
       - name: Build with dotnet
         run: dotnet build --configuration Release

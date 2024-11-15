@@ -1,8 +1,7 @@
 namespace mathAi_backend.Dtos;
 
-public class ExerciseDto
+public class ExerciseUpdateDto
 {
-    public string Id { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string FirstHint { get; set; } = string.Empty;
     public string SecondHint { get; set; } = string.Empty;

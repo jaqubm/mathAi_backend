@@ -21,7 +21,7 @@ public class AssignmentSubmission
     public virtual Assignment? Assignment { get; set; }
     
     [Required]
-    [MaxLength(255)]
+    [MaxLength(21)]
     [ForeignKey("StudentId")]
     public string StudentId { get; set; }
     public virtual User? Student { get; set; }
