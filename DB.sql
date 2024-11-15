@@ -18,7 +18,7 @@ CREATE TABLE mathAi.[User]
 CREATE TABLE mathAi.[ExerciseSet]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the exercise set
-    Name NVARCHAR(255) NOT NULL,                -- Name of the exercise set
+    Name NVARCHAR(30) NOT NULL,                -- Name of the exercise set
     SchoolType NVARCHAR(50) NOT NULL,           -- Type of school (e.g., "Primary", "High School")
     Grade INT NOT NULL,                         -- Grade level associated with the exercise set
     Subject NVARCHAR(255) NOT NULL,             -- Subject of the exercise set (e.g., "Math")

@@ -49,6 +49,7 @@ public class ClassRepository(IConfiguration config) : IClassRepository
     {
         return await _entityFramework
             .Class
+            .Include(c => c.Owner)
             .Include(c => c.ClassStudents)
             .Include(c => c.Assignments)
             .FirstOrDefaultAsync(c => c.Id == classId);

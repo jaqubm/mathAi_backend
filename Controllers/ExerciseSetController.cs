@@ -137,7 +137,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
     }
     
     [HttpPost("Copy/{exerciseSetId}")]
-    public async Task<ActionResult<ExerciseSet>> CopyExerciseSet([FromRoute] string exerciseSetId)
+    public async Task<ActionResult<string>> CopyExerciseSet([FromRoute] string exerciseSetId)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
@@ -192,8 +192,8 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         return Ok(exerciseSet);
     }
 
-    [HttpPut("Update/{exerciseSetId}")]
-    public async Task<ActionResult<ExerciseSet>> UpdateExerciseSet([FromRoute] string exerciseSetId, [FromBody] ExerciseSetDto exerciseSetDto)
+    [HttpPut("UpdateName/{exerciseSetId}")]
+    public async Task<ActionResult<ExerciseSet>> UpdateExerciseSet([FromRoute] string exerciseSetId, [FromBody] string exerciseSetName)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
@@ -201,13 +201,13 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         if (exerciseSetDb is null)
             return NotFound($"Could not find exercise set with id {exerciseSetId}.");
         
-        if (!string.Equals(exerciseSetDb.UserId, userId)) return Unauthorized("You are not authorized to update this exercise set.");
+        if (!string.Equals(exerciseSetDb.UserId, userId)) return Unauthorized("You are not authorized to update name of this exercise set.");
 
-        _mapper.Map(exerciseSetDto, exerciseSetDb);
+        exerciseSetDb.Name = exerciseSetName;
 
         exerciseSetRepository.UpdateEntity(exerciseSetDb);
 
-        return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update exercise set.");
+        return await exerciseSetRepository.SaveChangesAsync() ? Ok() : Problem("Failed to update name of exercise set.");
     }
 
     [HttpDelete("Delete/{exerciseSetId}")]

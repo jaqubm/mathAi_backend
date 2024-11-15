@@ -87,6 +87,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         
         var classList = _mapper.Map<List<ClassListDto>>(classListDb);
         
+        classList.ForEach(cl => cl.IsOwner = classListDb.Find(c => c.Id == cl.Id)?.Owner?.Id == userId);
+        
         return Ok(classList);
     }
 

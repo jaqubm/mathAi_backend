@@ -127,8 +127,8 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while adding user to {classDb.Name} class.");
     }
     
-    [HttpDelete("RemoveStudent/{classId}")]
-    public async Task<ActionResult<string>> RemoveStudentFromClass([FromRoute] string classId, [FromBody] string studentEmail)
+    [HttpDelete("RemoveStudent/{classId}/{studentEmail}")]
+    public async Task<ActionResult<string>> RemoveStudentFromClass([FromRoute] string classId, [FromRoute] string studentEmail)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await classRepository.GetUserByIdAsync(userId);
