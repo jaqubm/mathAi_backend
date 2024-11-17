@@ -12,7 +12,7 @@ public class DataContext(IConfiguration config) : DbContext
     public virtual DbSet<ClassStudent> ClassStudent { get; set; }
     public virtual DbSet<Assignment> Assignment { get; set; }
     public virtual DbSet<AssignmentSubmission> AssignmentSubmission { get; set; }
-    public virtual DbSet<ExerciseAnswers> ExerciseAnswers { get; set; }
+    public virtual DbSet<ExerciseAnswer> ExerciseAnswer { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -121,17 +121,17 @@ public class DataContext(IConfiguration config) : DbContext
             .HasForeignKey(sub => sub.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // ExerciseAnswers
-        modelBuilder.Entity<ExerciseAnswers>()
+        // ExerciseAnswer
+        modelBuilder.Entity<ExerciseAnswer>()
             .HasKey(ea => ea.Id);
 
-        modelBuilder.Entity<ExerciseAnswers>()
+        modelBuilder.Entity<ExerciseAnswer>()
             .HasOne(ea => ea.AssignmentSubmission)
-            .WithMany(sub => sub.ExerciseAnswers)
-            .HasForeignKey(ea => ea.AssignmentSubmissionId)
+            .WithOne(sub => sub.ExerciseAnswer)
+            .HasForeignKey<ExerciseAnswer>(ea => ea.AssignmentSubmissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<ExerciseAnswers>()
+        modelBuilder.Entity<ExerciseAnswer>()
             .HasOne(ea => ea.Exercise)
             .WithMany(e => e.ExerciseAnswers)
             .HasForeignKey(ea => ea.ExerciseId)

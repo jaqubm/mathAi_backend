@@ -26,7 +26,7 @@ public class AssignmentSubmission
     public string StudentId { get; set; }
     public virtual User? Student { get; set; }
 
-    public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
+    public virtual ExerciseAnswer ExerciseAnswer { get; set; } = new();
 
     public AssignmentSubmission()
     {

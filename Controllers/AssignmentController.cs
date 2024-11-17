@@ -1,39 +1,52 @@
 using AutoMapper;
 using mathAi_backend.Dtos;
+using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
-/*[ApiController]
+[ApiController]
 [Route("[controller]")]
-public class AssignmentController(IAssignmentRepository assignmentRepository, IClassRepository classRepository, IExerciseSetRepository exerciseSetRepository) : ControllerBase
+public class AssignmentController(IAssignmentRepository assignmentRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
-        c.CreateMap<AssignmentDto, Assignment>();
-    })); 
-    
+        c.CreateMap<Assignment, AssignmentDto>();
+    }));
+
     [HttpPost("Create")]
-    public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentDto assignmentDto)
+    public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentCreatorDto assignmentCreatorDto)
     {
-        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var classDb = await assignmentRepository.GetClassByIdAsync(assignmentCreatorDto.ClassId);
         
-        if (classDb is null) return NotFound("Class not found.");
+        if (classDb is null) return NotFound("Class not found");
+        if (!classDb.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to create an assignment for this class.");
         
-        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
+        var exerciseSetDb = await assignmentRepository.GetExerciseSetByIdAsync(assignmentCreatorDto.ExerciseSetId);
         
-        if (exerciseSetDb is null) return NotFound("Exercise set not found.");
-        
-        var assignment = _mapper.Map<AssignmentDto, Assignment>(assignmentDto);
+        if (exerciseSetDb is null) return NotFound("Exercise set not found");
+        if (exerciseSetDb.UserId is null || !exerciseSetDb.UserId.Equals(userId)) 
+            return Unauthorized("You are not authorized to create an assignment with exercise set you do not own.");
+
+        var assignment = new Assignment
+        {
+            Name = assignmentCreatorDto.Name,
+            StartDate = assignmentCreatorDto.StartDate,
+            DueDate = assignmentCreatorDto.DueDate,
+            ClassId = assignmentCreatorDto.ClassId,
+            ExerciseSetId = assignmentCreatorDto.ExerciseSetId
+        };
         
         classDb.ClassStudents.ForEach(cs =>
         {
             assignment.Submissions.Add(new AssignmentSubmission
             {
-                AssignmentId = assignment.Id, 
-                StudentId = cs.StudentId
+                AssignmentId = assignment.Id,
+                StudentId = cs.StudentId,
             });
         });
         
@@ -41,48 +54,4 @@ public class AssignmentController(IAssignmentRepository assignmentRepository, IC
         
         return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
     }
-
-    [HttpGet("Get/{assignmentId}")]
-    public async Task<ActionResult<Assignment>> GetAssignment([FromRoute] string assignmentId)
-    {
-        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
-        
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
-        
-        return Ok(assignmentDb);
-    }
-
-    [HttpPut("Update/{assignmentId}")]
-    public async Task<ActionResult<string>> UpdateAssignment([FromRoute] string assignmentId, [FromBody] AssignmentDto assignmentDto)
-    {
-        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
-        
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
-        
-        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
-        
-        if (classDb is null) return NotFound("Class not found.");
-        
-        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
-        
-        if (exerciseSetDb is null) return NotFound("Exercise set not found.");
-        
-        _mapper.Map(assignmentDto, assignmentDb);
-        
-        assignmentRepository.UpdateEntity(assignmentDb);
-        
-        return await assignmentRepository.SaveChangesAsync() ? Ok(assignmentDb.Id) : Problem("Error occured while updating assignment.");
-    }
-
-    [HttpDelete("Delete/{assignmentId}")]
-    public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
-    {
-        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
-        
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
-        
-        assignmentRepository.DeleteEntity(assignmentDb);
-        
-        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting assignment.");
-    }
-}*/
+}

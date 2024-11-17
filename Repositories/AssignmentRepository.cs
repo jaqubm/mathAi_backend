@@ -1,6 +1,5 @@
 using mathAi_backend.Data;
 using mathAi_backend.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
@@ -31,12 +30,24 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             _entityFramework.Remove(entity);
     }
 
-    public async Task<Assignment?> GetAssignmentByIdAsync(string id)
+    public async Task<User?> GetUserByIdAsync(string userId)
     {
         return await _entityFramework
-            .Assignment
-            .Include(a => a.Class)
-            .Include(a => a.ExerciseSet)
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .User
+            .FindAsync(userId);
+    }
+
+    public async Task<Class?> GetClassByIdAsync(string classId)
+    {
+        return await _entityFramework
+            .Class
+            .FindAsync(classId);
+    }
+
+    public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)
+    {
+        return await _entityFramework
+            .ExerciseSet
+            .FindAsync(exerciseSetId);
     }
 }
