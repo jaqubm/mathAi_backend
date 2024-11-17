@@ -52,4 +52,13 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             .ExerciseSet
             .FindAsync(exerciseSetId);
     }
+
+    public async Task<Assignment?> GetAssignmentByIdAsync(string assignmentId)
+    {
+        return await _entityFramework
+            .Assignment
+            .Include(a => a.Class)
+            .Include(a => a.Submissions)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId);
+    }
 }

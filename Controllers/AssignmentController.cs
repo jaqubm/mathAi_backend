@@ -51,9 +51,23 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
                 StudentId = cs.StudentId,
             });
         });
-
-        Console.WriteLine(assignment.Submissions.Count);
         
         return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
+    }
+
+    [HttpDelete("Delete/{assignmentId}")]
+    public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
+        
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to delete an assignment from this class.");
+        
+        assignmentRepository.DeleteEntity(assignmentDb);
+        
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting an assignment from this class.");
     }
 }

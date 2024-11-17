@@ -13,4 +13,6 @@ public interface IAssignmentRepository
     public Task<User?> GetUserByIdAsync(string userId);
     public Task<Class?> GetClassByIdAsync(string classId);
     public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
+    
+    public Task<Assignment?> GetAssignmentByIdAsync(string assignmentId);
 }
