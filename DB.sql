@@ -80,8 +80,8 @@ CREATE TABLE mathAi.[Assignment]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the assignment
     Name NVARCHAR(30) NOT NULL,                -- Name of the assignment
-    StartDate DATE NOT NULL,                    -- Start date of the assignment
-    DueDate DATE NOT NULL,                      -- Due date of the assignment
+    StartDate DATETIME NOT NULL,                    -- Start date of the assignment
+    DueDate DATETIME NOT NULL,                      -- Due date of the assignment
     ClassId NVARCHAR(50) NOT NULL,              -- Foreign key linking the assignment to a class
     ExerciseSetId NVARCHAR(50) NOT NULL,        -- Foreign key linking the assignment to an exercise set
 

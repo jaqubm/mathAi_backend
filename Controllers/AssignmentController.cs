@@ -1,88 +1,125 @@
 using AutoMapper;
 using mathAi_backend.Dtos;
+using mathAi_backend.Helpers;
 using mathAi_backend.Models;
 using mathAi_backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace mathAi_backend.Controllers;
 
-/*[ApiController]
+[ApiController]
 [Route("[controller]")]
-public class AssignmentController(IAssignmentRepository assignmentRepository, IClassRepository classRepository, IExerciseSetRepository exerciseSetRepository) : ControllerBase
+public class AssignmentController(IAssignmentRepository assignmentRepository) : ControllerBase
 {
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
-        c.CreateMap<AssignmentDto, Assignment>();
-    })); 
-    
+        c.CreateMap<Assignment, AssignmentDto>();
+    }));
+
     [HttpPost("Create")]
-    public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentDto assignmentDto)
+    public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentCreatorDto assignmentCreatorDto)
     {
-        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var classDb = await assignmentRepository.GetClassByIdAsync(assignmentCreatorDto.ClassId);
         
-        if (classDb is null) return NotFound("Class not found.");
+        if (classDb is null) return NotFound("Class not found");
+        if (!classDb.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to create an assignment for this class.");
         
-        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
+        var exerciseSetDb = await assignmentRepository.GetExerciseSetByIdAsync(assignmentCreatorDto.ExerciseSetId);
         
-        if (exerciseSetDb is null) return NotFound("Exercise set not found.");
+        if (exerciseSetDb is null) return NotFound("Exercise set not found");
+        if (exerciseSetDb.UserId is null || !exerciseSetDb.UserId.Equals(userId)) 
+            return Unauthorized("You are not authorized to create an assignment with exercise set you do not own.");
+
+        var assignment = new Assignment
+        {
+            Name = assignmentCreatorDto.Name,
+            StartDate = assignmentCreatorDto.StartDate,
+            DueDate = assignmentCreatorDto.DueDate,
+            ClassId = assignmentCreatorDto.ClassId,
+            ExerciseSetId = assignmentCreatorDto.ExerciseSetId
+        };
         
-        var assignment = _mapper.Map<AssignmentDto, Assignment>(assignmentDto);
+        await assignmentRepository.AddEntityAsync(assignment);
         
         classDb.ClassStudents.ForEach(cs =>
         {
             assignment.Submissions.Add(new AssignmentSubmission
             {
-                AssignmentId = assignment.Id, 
-                StudentId = cs.StudentId
+                AssignmentId = assignment.Id,
+                StudentId = cs.StudentId,
             });
         });
-        
-        await assignmentRepository.AddEntityAsync(assignment);
         
         return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
     }
 
     [HttpGet("Get/{assignmentId}")]
-    public async Task<ActionResult<Assignment>> GetAssignment([FromRoute] string assignmentId)
+    public async Task<ActionResult<AssignmentDto>> GetAssignment(string assignmentId)
     {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.Submissions.All(s => s.StudentId != userId)) 
+            return Unauthorized("You are not authorized to see this assignment.");
         
-        return Ok(assignmentDb);
+        var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
+        
+        return Ok(assignment);
     }
-
-    [HttpPut("Update/{assignmentId}")]
-    public async Task<ActionResult<string>> UpdateAssignment([FromRoute] string assignmentId, [FromBody] AssignmentDto assignmentDto)
+    
+    [HttpPut("UpdateName/{assignmentId}")]
+    public async Task<ActionResult<string>> UpdateAssignmentName([FromRoute] string assignmentId, [FromBody] string assignmentName)
     {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to update name of this assignment in this class.");
         
-        var classDb = await classRepository.GetClassByIdAsync(assignmentDto.ClassId);
-        
-        if (classDb is null) return NotFound("Class not found.");
-        
-        var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(assignmentDto.ExerciseSetId);
-        
-        if (exerciseSetDb is null) return NotFound("Exercise set not found.");
-        
-        _mapper.Map(assignmentDto, assignmentDb);
+        assignmentDb.Name = assignmentName;
         
         assignmentRepository.UpdateEntity(assignmentDb);
         
-        return await assignmentRepository.SaveChangesAsync() ? Ok(assignmentDb.Id) : Problem("Error occured while updating assignment.");
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while updating an assignment from this class.");
+    }
+
+    [HttpPut("UpdateDueDate/{assignmentId}")]
+    public async Task<ActionResult<string>> UpdateAssignmentDueDate([FromRoute] string assignmentId, [FromBody] DateTime assignmentDueDate)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
+        
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to update due date of this assignment in this class.");
+        
+        assignmentDb.DueDate = assignmentDueDate;
+        
+        assignmentRepository.UpdateEntity(assignmentDb);
+        
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while updating an assignment from this class.");
     }
 
     [HttpDelete("Delete/{assignmentId}")]
     public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
     {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
-        if (assignmentDb is null) return NotFound("Assignment with given ID not found.");
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to delete an assignment from this class.");
         
         assignmentRepository.DeleteEntity(assignmentDb);
         
-        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting assignment.");
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while deleting an assignment from this class.");
     }
-}*/
+}

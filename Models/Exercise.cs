@@ -32,7 +32,7 @@ public class Exercise
     public string ExerciseSetId { get; set; }
     public virtual ExerciseSet? ExerciseSet { get; set; }
     
-    public virtual ICollection<ExerciseAnswers> ExerciseAnswers { get; set; } = [];
+    public virtual ICollection<ExerciseAnswer> ExerciseAnswers { get; set; } = [];
 
 
     public Exercise()

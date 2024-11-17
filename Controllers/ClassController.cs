@@ -21,7 +21,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
     })); 
     
     [HttpPost("Create")]
-    public async Task<ActionResult<string>> CreateClass([FromBody] ClassCreatorDto classCreatorListDto)
+    public async Task<ActionResult<string>> CreateClass([FromBody] ClassCreatorDto classCreatorDto)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await classRepository.GetUserByIdAsync(userId);
@@ -31,11 +31,11 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         
         var newClass = new Class
         {
-            Name = classCreatorListDto.Name, 
+            Name = classCreatorDto.Name, 
             OwnerId = userId
         };
 
-        foreach (var studentEmail in classCreatorListDto.StudentEmailList)
+        foreach (var studentEmail in classCreatorDto.StudentEmailList)
         {
             var studentDb = await classRepository.GetUserByEmailAsync(studentEmail);
 
@@ -139,6 +139,17 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
             ClassId = classDb.Id,
             StudentId = studentDb.Id
         });
+
+        foreach (var assignmentSubmission in from assignment in classDb.Assignments
+                 where DateTime.Now < assignment.DueDate
+                 select new AssignmentSubmission
+                 {
+                     AssignmentId = assignment.Id,
+                     StudentId = studentDb.Id
+                 })
+        {
+            await classRepository.AddEntityAsync(assignmentSubmission);
+        }
 
         classRepository.UpdateEntity(classDb);
 

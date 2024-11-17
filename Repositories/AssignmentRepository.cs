@@ -31,12 +31,27 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             _entityFramework.Remove(entity);
     }
 
-    public async Task<Assignment?> GetAssignmentByIdAsync(string id)
+    public async Task<Class?> GetClassByIdAsync(string classId)
+    {
+        return await _entityFramework
+            .Class
+            .Include(c => c.ClassStudents)
+            .FirstOrDefaultAsync(c => c.Id == classId);
+    }
+
+    public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)
+    {
+        return await _entityFramework
+            .ExerciseSet
+            .FindAsync(exerciseSetId);
+    }
+
+    public async Task<Assignment?> GetAssignmentByIdAsync(string assignmentId)
     {
         return await _entityFramework
             .Assignment
             .Include(a => a.Class)
-            .Include(a => a.ExerciseSet)
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .Include(a => a.Submissions)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId);
     }
 }

@@ -10,5 +10,8 @@ public interface IAssignmentRepository
     public void UpdateEntity<T>(T entity);
     public void DeleteEntity<T>(T entity);
     
-    public Task<Assignment?> GetAssignmentByIdAsync(string id);
+    public Task<Class?> GetClassByIdAsync(string classId);
+    public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
+    
+    public Task<Assignment?> GetAssignmentByIdAsync(string assignmentId);
 }

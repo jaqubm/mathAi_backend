@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace mathAi_backend.Models;
 
-public class ExerciseAnswers
+public class ExerciseAnswer
 {
     [Key]
     [MaxLength(50)]
@@ -26,7 +26,7 @@ public class ExerciseAnswers
     public string ExerciseId { get; set; }
     public virtual Exercise Exercise { get; set; }
 
-    public ExerciseAnswers()
+    public ExerciseAnswer()
     {
         Id = Guid.NewGuid().ToString();
         StudentAnswer = string.Empty;
