@@ -55,6 +55,22 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
     }
 
+    [HttpGet("Get/{assignmentId}")]
+    public async Task<ActionResult<AssignmentDto>> GetAssignment(string assignmentId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
+        
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.Submissions.All(s => s.StudentId != userId)) 
+            return Unauthorized("You are not authorized to see this assignment.");
+        
+        var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
+        
+        return Ok(assignment);
+    }
+
     [HttpDelete("Delete/{assignmentId}")]
     public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
     {
