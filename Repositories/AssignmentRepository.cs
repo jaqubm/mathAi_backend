@@ -31,13 +31,6 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             _entityFramework.Remove(entity);
     }
 
-    public async Task<User?> GetUserByIdAsync(string userId)
-    {
-        return await _entityFramework
-            .User
-            .FindAsync(userId);
-    }
-
     public async Task<Class?> GetClassByIdAsync(string classId)
     {
         return await _entityFramework

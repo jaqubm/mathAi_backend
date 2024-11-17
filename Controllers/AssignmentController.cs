@@ -70,6 +70,42 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         
         return Ok(assignment);
     }
+    
+    [HttpPut("UpdateName/{assignmentId}")]
+    public async Task<ActionResult<string>> UpdateAssignmentName([FromRoute] string assignmentId, [FromBody] string assignmentName)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
+        
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to update name of this assignment in this class.");
+        
+        assignmentDb.Name = assignmentName;
+        
+        assignmentRepository.UpdateEntity(assignmentDb);
+        
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while updating an assignment from this class.");
+    }
+
+    [HttpPut("UpdateDueDate/{assignmentId}")]
+    public async Task<ActionResult<string>> UpdateAssignmentDueDate([FromRoute] string assignmentId, [FromBody] DateTime assignmentDueDate)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
+        
+        if (assignmentDb is null) return NotFound("Assignment not found.");
+        if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (!assignmentDb.Class.OwnerId.Equals(userId)) 
+            return Unauthorized("You are not authorized to update due date of this assignment in this class.");
+        
+        assignmentDb.DueDate = assignmentDueDate;
+        
+        assignmentRepository.UpdateEntity(assignmentDb);
+        
+        return await assignmentRepository.SaveChangesAsync() ? Ok() : Problem("Error occured while updating an assignment from this class.");
+    }
 
     [HttpDelete("Delete/{assignmentId}")]
     public async Task<ActionResult<string>> DeleteAssignment([FromRoute] string assignmentId)
