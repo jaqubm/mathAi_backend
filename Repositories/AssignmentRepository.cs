@@ -1,5 +1,6 @@
 using mathAi_backend.Data;
 using mathAi_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mathAi_backend.Repositories;
 
@@ -41,7 +42,8 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
     {
         return await _entityFramework
             .Class
-            .FindAsync(classId);
+            .Include(c => c.ClassStudents)
+            .FirstOrDefaultAsync(c => c.Id == classId);
     }
 
     public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)

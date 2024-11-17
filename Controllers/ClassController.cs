@@ -140,6 +140,17 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
             StudentId = studentDb.Id
         });
 
+        foreach (var assignmentSubmission in from assignment in classDb.Assignments
+                 where DateTime.Now < assignment.DueDate
+                 select new AssignmentSubmission
+                 {
+                     AssignmentId = assignment.Id,
+                     StudentId = studentDb.Id
+                 })
+        {
+            await classRepository.AddEntityAsync(assignmentSubmission);
+        }
+
         classRepository.UpdateEntity(classDb);
 
         return await classRepository.SaveChangesAsync() ? Ok() : Problem($"Error occured while adding user to {classDb.Name} class.");

@@ -41,6 +41,8 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             ExerciseSetId = assignmentCreatorDto.ExerciseSetId
         };
         
+        await assignmentRepository.AddEntityAsync(assignment);
+        
         classDb.ClassStudents.ForEach(cs =>
         {
             assignment.Submissions.Add(new AssignmentSubmission
@@ -49,8 +51,8 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
                 StudentId = cs.StudentId,
             });
         });
-        
-        await assignmentRepository.AddEntityAsync(assignment);
+
+        Console.WriteLine(assignment.Submissions.Count);
         
         return await assignmentRepository.SaveChangesAsync() ? Ok(assignment.Id) : Problem("Error occured while creating new assignment.");
     }
