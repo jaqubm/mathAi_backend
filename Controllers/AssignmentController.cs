@@ -31,6 +31,8 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         if (exerciseSetDb is null) return NotFound("Exercise set not found");
         if (exerciseSetDb.UserId is null || !exerciseSetDb.UserId.Equals(userId)) 
             return Unauthorized("You are not authorized to create an assignment with exercise set you do not own.");
+        
+        if (assignmentCreatorDto.DueDate < assignmentCreatorDto.StartDate) return BadRequest("Due date cannot be earlier than start date.");
 
         var assignment = new Assignment
         {
@@ -99,6 +101,8 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         if (assignmentDb.Class is null) return NotFound("Class not found.");
         if (!assignmentDb.Class.OwnerId.Equals(userId)) 
             return Unauthorized("You are not authorized to update due date of this assignment in this class.");
+        
+        if (assignmentDueDate < assignmentDb.StartDate) return BadRequest("Due date cannot be earlier than start date.");
         
         assignmentDb.DueDate = assignmentDueDate;
         
