@@ -2,6 +2,7 @@ namespace mathAi_backend.Dtos;
 
 public class AssignmentListDto
 {
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public DateTime StartDate { get; set; } = DateTime.Today;
     public DateTime DueDate { get; set; } = DateTime.Today;
