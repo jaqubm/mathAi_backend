@@ -61,7 +61,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             for (var i = 0; i < exerciseSetSettings.NumberOfExercises; i++)
             {
-                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetSettings));
+                var chatCompletion = await OpenAiHelper.GenerateExercise(client, exerciseSetSettings);
 
                 try
                 {
@@ -112,7 +112,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                var chatCompletion = await client.CompleteChatAsync(OpenAiHelper.GenerateExerciseSetPrompt(exerciseSetGenerator));
+                var chatCompletion = await OpenAiHelper.GenerateExercise(client, exerciseSetGenerator);
 
                 try
                 {

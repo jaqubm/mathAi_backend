@@ -25,6 +25,9 @@ public class ExerciseSet
     [MaxLength(255)]
     public string Subject { get; set; }
     
+    [MaxLength(255)]
+    public string Personalized { get; set; }
+    
     [MaxLength(21)]
     [ForeignKey("UserId")]
     public string? UserId { get; set; }

@@ -7,4 +7,5 @@ public class ExerciseSetListDto
     public string SchoolType { get; set; } = "";
     public string Grade { get; set; } = "";
     public string Subject { get; set; } = "";
+    public string? Personalized  { get; set; } = string.Empty;
 }
