@@ -1,5 +1,6 @@
 using System.ClientModel;
 using mathAi_backend.Dtos;
+using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 
 namespace mathAi_backend.Helpers;
@@ -24,10 +25,12 @@ public class OpenAiHelper(IConfiguration config)
             $"klasa: {exerciseSetSettings.Grade}, " +
             $"o tematyce: {exerciseSetSettings.Subject}. " +
             "Zadanie powinno być ciekawe i rozbudowane. " + 
+            (exerciseSetSettings.Personalized.IsNullOrEmpty() ? string.Empty : $"\n\nSpersonalizuj zadania, aby dotyczyły: {exerciseSetSettings.Personalized}. ") +
             "Zadanie powinno składać się z treści zadania - Content, trzech podpowiedzi - FirstHint, SecondHint, ThirdHint, oraz odpowiedzi - Solution. " +
             "Wzory formatuj w taki sposób, aby były możliwe do wyświetlenia z MathJax. " +
             @"Przykład formatowania wzorów: $$ T(t) = 5 \cdot \sin\left(\frac{\pi}{12}t \right) + 20 $$. " +
             "Oto przykład w jakim formacie powinieneś zwracać dane - nie formatuj ich jako markdown tylko niesformatowany tekst za wyjątkiem wzorów: " +
+            
             """
             Rozważ funkcję trygonometryczną oraz jej złożoność:
             \[
@@ -42,7 +45,7 @@ public class OpenAiHelper(IConfiguration config)
 
             4. Wyznacz przeciwną funkcję odwrotną \(f^{-1}(x)\). Kiedy jest to możliwe?
 
-            5. Skonstruuj wykres funkcji \(f(x)\) dla przedziału \([-\frac{\pi}{2}, \frac{3\pi}{2}]\).
+            5. Skonstruuj wykres funkcji \(f(x)\) dla przedziału \([-\frac{\pi}{2}, \frac{3\pi}{2}]\). 
             """
         );
     }
