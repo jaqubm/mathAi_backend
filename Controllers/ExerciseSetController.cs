@@ -153,6 +153,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             SchoolType = exerciseSetDb.SchoolType,
             Grade = exerciseSetDb.Grade,
             Subject = exerciseSetDb.Subject,
+            Personalized = exerciseSetDb.Personalized,
             UserId = userId,
         };
 
