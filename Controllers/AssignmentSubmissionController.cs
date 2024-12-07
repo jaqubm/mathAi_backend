@@ -45,9 +45,8 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
                                exerciseAnswerCreatorDto.ExerciseId +
                                uploadedFileExtension;
         
+        var assistant = await _assistantClientHelper.CreateExerciseAssistant();
         var uploadedAnswerImage = await _assistantClientHelper.UploadSolutionImageAsync(uploadedFileBytes, uploadedFileName);
-        Console.WriteLine(uploadedAnswerImage.Filename);
-        var assistant = await _assistantClientHelper.CreateExerciseAssistant(uploadedAnswerImage);
         
         var (grade, feedback) = await _assistantClientHelper.GradeExerciseSolutionAsync(assistant, exerciseDb.Content, uploadedAnswerImage);
         

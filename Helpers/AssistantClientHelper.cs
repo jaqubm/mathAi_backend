@@ -32,7 +32,7 @@ public class AssistantClientHelper
         return uploadedFile;
     }
 
-    public async Task<Assistant> CreateExerciseAssistant(OpenAIFile openAiFile)
+    public async Task<Assistant> CreateExerciseAssistant()
     {
         var assistantOptions = new AssistantCreationOptions
         {
