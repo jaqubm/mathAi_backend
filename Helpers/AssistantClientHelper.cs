@@ -20,14 +20,10 @@ public class AssistantClientHelper
         _fileClient = openAiClient.GetOpenAIFileClient();
         _assistantClient = openAiClient.GetAssistantClient();
     }
-
-    /// <summary>
-    /// Uploads an image for vision purposes.
-    /// </summary>
+    
     public async Task<OpenAIFile> UploadSolutionImageAsync(byte[] solutionImage, string fileName)
     {
         using var imageStream = new MemoryStream(solutionImage);
-        // Use Vision upload purpose for images
         var uploadedFile = await _fileClient.UploadFileAsync(
             imageStream,
             fileName,
@@ -47,17 +43,12 @@ public class AssistantClientHelper
                            "Zwróć odpowiedź w następującym formacie JSON:\n" +
                            "{ \"Grade\": <int>, \"Feedback\": \"<string>\" }",
         };
-
-        // Use a vision-capable model, e.g. "gpt-4o"
+        
         return await _assistantClient.CreateAssistantAsync("gpt-4o", assistantOptions);
     }
-
-    /// <summary>
-    /// Creates a thread that includes the image as a message to the assistant.
-    /// </summary>
+    
     public async Task<(int grade, string feedback)> GradeExerciseSolutionAsync(Assistant assistant, string exerciseContent, OpenAIFile solutionImageFile)
     {
-        // Provide both the textual prompt and the image in the initial messages
         var threadOptions = new ThreadCreationOptions
         {
             InitialMessages = 
@@ -75,11 +66,9 @@ public class AssistantClientHelper
                 )
             }
         };
-
-        // Create the thread and run the assistant
+        
         var threadRun = await _assistantClient.CreateThreadAndRunAsync(assistant.Id, threadOptions);
-
-        // Poll until the run completes
+        
         do
         {
             Thread.Sleep(TimeSpan.FromSeconds(1));
@@ -90,8 +79,7 @@ public class AssistantClientHelper
         {
             throw new Exception("The assistant could not complete the grading.");
         }
-
-        // Retrieve the messages and look for the assistant's response
+        
         CollectionResult<ThreadMessage> messages = _assistantClient.GetMessages(threadRun.Value.ThreadId, new MessageCollectionOptions { Order = MessageCollectionOrder.Ascending });
         
         foreach (var message in messages)
