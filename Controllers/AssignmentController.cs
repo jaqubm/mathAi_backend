@@ -23,7 +23,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var classDb = await assignmentRepository.GetClassByIdAsync(assignmentCreatorDto.ClassId);
         
-        if (classDb is null) return NotFound("Class not found");
+        if (classDb is null) return NotFound("Class not found.");
         if (!classDb.OwnerId.Equals(userId)) 
             return Unauthorized("You are not authorized to create an assignment for this class.");
         

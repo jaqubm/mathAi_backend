@@ -110,6 +110,7 @@ builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseSetRepository, ExerciseSetRepository>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<IAssignmentSubmissionRepository, AssignmentSubmissionRepository>();
 
 var app = builder.Build();
 
