@@ -9,7 +9,7 @@ namespace mathAi_backend.Controllers;
 public class ApiController(IConfiguration config) : ControllerBase
 {
     private readonly DataContext _entityFramework = new(config);
-    private readonly OpenAiHelper _openAiHelper = new(config);
+    private readonly ChatClientHelper _chatClientHelper = new(config);
     
     [HttpGet("Status")]
     public async Task<ActionResult<Dictionary<string, string>>> GetStatus()
@@ -18,7 +18,7 @@ public class ApiController(IConfiguration config) : ControllerBase
         
         try
         {
-            var client = _openAiHelper.CreateChatClient();
+            var client = _chatClientHelper.CreateChatClient();
             var openAiConnectionStatus = await client.CompleteChatAsync("Write OK if connection was successful");
 
             return Ok(new Dictionary<string, string>
