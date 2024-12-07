@@ -8,11 +8,13 @@ public class ExerciseAnswer
     [Key]
     [MaxLength(50)]
     public string Id { get; set; }
-
-    public string StudentAnswer { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string AssistantId { get; set; }
+    
     public int? Grade { get; set; }
-    public string Feedback { get; set; }
-    public DateTime? AnsweredDate { get; set; }
+    public string? Feedback { get; set; }
     
     [Required]
     [MaxLength(50)]
@@ -29,9 +31,8 @@ public class ExerciseAnswer
     public ExerciseAnswer()
     {
         Id = Guid.NewGuid().ToString();
-        StudentAnswer = string.Empty;
+        AssistantId = string.Empty;
         Feedback = string.Empty;
-        AnsweredDate = DateTime.Now;
         AssignmentSubmissionId = string.Empty;
         ExerciseId = string.Empty;
     }

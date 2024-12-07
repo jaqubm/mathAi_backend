@@ -5,6 +5,7 @@ USE [mathAi-DB];
 CREATE SCHEMA mathAi;
 
 
+-- User Table
 CREATE TABLE mathAi.[User]
 (
     Id NVARCHAR(21) NOT NULL PRIMARY KEY,       -- New primary key identifier for the user
@@ -15,6 +16,7 @@ CREATE TABLE mathAi.[User]
 );
 
 
+-- ExerciseSet Table
 CREATE TABLE mathAi.[ExerciseSet]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the exercise set
@@ -31,6 +33,7 @@ CREATE TABLE mathAi.[ExerciseSet]
 );
 
 
+-- Exercise Table
 CREATE TABLE mathAi.[Exercise]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the exercise
@@ -47,10 +50,11 @@ CREATE TABLE mathAi.[Exercise]
 );
 
 
+-- Class Table
 CREATE TABLE mathAi.[Class]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the class
-    Name NVARCHAR(30) NOT NULL,                -- Name of the class
+    Name NVARCHAR(30) NOT NULL,                 -- Name of the class
     OwnerId NVARCHAR(21) NOT NULL,              -- Foreign key linking the class to the teacher (User)
 
     CONSTRAINT FK_User_Class_Owner FOREIGN KEY (OwnerId)
@@ -59,6 +63,7 @@ CREATE TABLE mathAi.[Class]
 );
 
 
+-- ClassStudent Table
 CREATE TABLE mathAi.[ClassStudent]
 (
     Id INT IDENTITY(1,1) PRIMARY KEY,           -- Surrogate key as primary key
@@ -71,18 +76,19 @@ CREATE TABLE mathAi.[ClassStudent]
 
     CONSTRAINT FK_User_ClassStudent FOREIGN KEY (StudentId)
         REFERENCES mathAi.[User](Id)
-        ON DELETE NO ACTION,                    -- Prevents cascading deletes to avoid multiple paths
+        ON DELETE NO ACTION,
 
     UNIQUE (ClassId, StudentId)                 -- Ensures unique ClassId + StudentId combination
 );
 
 
+-- Assignment Table
 CREATE TABLE mathAi.[Assignment]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for the assignment
-    Name NVARCHAR(30) NOT NULL,                -- Name of the assignment
-    StartDate DATETIME NOT NULL,                    -- Start date of the assignment
-    DueDate DATETIME NOT NULL,                      -- Due date of the assignment
+    Name NVARCHAR(30) NOT NULL,                 -- Name of the assignment
+    StartDate DATETIME NOT NULL,                -- Start date of the assignment
+    DueDate DATETIME NOT NULL,                  -- Due date of the assignment
     ClassId NVARCHAR(50) NOT NULL,              -- Foreign key linking the assignment to a class
     ExerciseSetId NVARCHAR(50) NOT NULL,        -- Foreign key linking the assignment to an exercise set
 
@@ -96,6 +102,7 @@ CREATE TABLE mathAi.[Assignment]
 );
 
 
+-- AssignmentSubmission Table
 CREATE TABLE mathAi.[AssignmentSubmission]
 (
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for each submission
@@ -113,16 +120,15 @@ CREATE TABLE mathAi.[AssignmentSubmission]
         ON DELETE NO ACTION
 );
 
-
+-- ExerciseAnswer Table
 CREATE TABLE mathAi.[ExerciseAnswer]
 (
-    Id NVARCHAR(50) NOT NULL PRIMARY KEY,       -- Unique identifier for each answer entry
-    AssignmentSubmissionId NVARCHAR(50) NOT NULL,-- Foreign key linking to the AssignmentSubmission table
-    ExerciseId NVARCHAR(50) NOT NULL,           -- Foreign key linking to the Exercise table
-    StudentAnswer NVARCHAR(MAX),                -- The student's answer to the exercise
-    Grade INT,                                  -- Grade given to the student's answer for the exercise
-    Feedback NVARCHAR(MAX),                     -- Optional feedback from the teacher
-    AnsweredDate DATETIME,                      -- Timestamp of when the student submitted their answer
+    Id NVARCHAR(50) NOT NULL PRIMARY KEY,           -- Unique identifier for each answer entry
+    AssignmentSubmissionId NVARCHAR(50) NOT NULL,   -- Foreign key linking to the AssignmentSubmission table
+    ExerciseId NVARCHAR(50) NOT NULL,               -- Foreign key linking to the Exercise table
+    AssistantId NVARCHAR(50) NOT NULL,              -- ID of the OpenAI Assistant for grading and feedback
+    Grade INT,                                      -- Grade given by the OpenAI Assistant for the exercise
+    Feedback NVARCHAR(MAX) DEFAULT '',              -- Feedback provided by the OpenAI Assistant, default empty
 
     CONSTRAINT FK_Submission_ExerciseAnswer FOREIGN KEY (AssignmentSubmissionId)
         REFERENCES mathAi.[AssignmentSubmission](Id)
@@ -132,6 +138,14 @@ CREATE TABLE mathAi.[ExerciseAnswer]
         REFERENCES mathAi.[Exercise](Id)
         ON DELETE NO ACTION
 );
+
+
+-- Indexes for optimized queries
+CREATE INDEX IX_ExerciseAnswer_AssignmentSubmissionId
+    ON mathAi.[ExerciseAnswer](AssignmentSubmissionId);
+
+CREATE INDEX IX_ExerciseAnswer_ExerciseId
+    ON mathAi.[ExerciseAnswer](ExerciseId);
 
 
 DROP TABLE mathAi.[ExerciseAnswer];

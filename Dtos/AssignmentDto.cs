@@ -6,6 +6,7 @@ public class AssignmentDto
     public DateTime StartDate { get; set; } = DateTime.Now;
     public DateTime DueDate { get; set; } = DateTime.Now;
     public string ClassId { get; set; } = string.Empty;
+    public ClassDto Class { get; set; } = new();
     public string ExerciseSetId { get; set; } = string.Empty;
-    // public IEnumerable<Assignment> <- TODO: Add assignment submissions with basic User info
+    public ICollection<AssignmentSubmissionListDto> Submissions { get; set; } = [];
 }
