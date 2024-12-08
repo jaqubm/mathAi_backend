@@ -16,8 +16,17 @@ public class ChatClientHelper(IConfiguration config)
 
     public static async Task<ClientResult<ChatCompletion>> GenerateExercise(ChatClient client, ExerciseSetSettingsDto exerciseSetSettings)
     {
-        return await client.CompleteChatAsync([GetGenerateExercisePrompt(exerciseSetSettings)], GetGenerateExerciseOptions());
+        var messages = new List<ChatMessage>
+        {
+            new SystemChatMessage("Jesteś asystentem, który nie korzysta z formatowania Markdown. " +
+                                  "Używaj wyłącznie czystego tekstu oraz notacji LaTeX do wzorów matematycznych. " +
+                                  "Nie stosuj pogrubień, nagłówków, list ani innego formatowania Markdown."),
+            GetGenerateExercisePrompt(exerciseSetSettings)
+        };
+
+        return await client.CompleteChatAsync(messages, GetGenerateExerciseOptions());
     }
+
 
     private static UserChatMessage GetGenerateExercisePrompt(ExerciseSetSettingsDto exerciseSetSettings)
     {
@@ -78,11 +87,5 @@ public class ChatClientHelper(IConfiguration config)
                 jsonSchemaIsStrict: true
                 )
         };
-    }
-
-    [Experimental("OPENAI001")]
-    public AssistantClient CreateAssistantClient()
-    {
-        return new AssistantClient(apiKey: config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
     }
 }
