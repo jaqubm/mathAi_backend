@@ -32,15 +32,15 @@ public class AssistantClientHelper
         return uploadedFile;
     }
 
-    public async Task<Assistant> CreateExerciseAssistant()
+    public async Task<Assistant> CreateExerciseAssistant(string assistantName)
     {
         var assistantOptions = new AssistantCreationOptions
         {
-            Name = "Asystent Oceny Zadań",
+            Name = assistantName,
             Instructions = "Jesteś asystentem przeznaczonym do oceniania i udzielania informacji zwrotnej na temat rozwiązań uczniów. " +
                            "Analizuj treść zadania oraz załączony obraz z rozwiązaniem. " +
-                           "Przyznaj ocenę w skali od 1 do 100 i zapewnij szczegółową informację zwrotną. " +
-                           "Zwróć odpowiedź w następującym formacie JSON:\n" +
+                           "Przyznaj ocenę punktową w skali od 0 do 100 i zapewnij szczegółową informację zwrotną. " +
+                           "Zwróć odpowiedź w języku polskim i następującym formacie JSON:\n" +
                            "{ \"Grade\": <int>, \"Feedback\": \"<string>\" }",
         };
         

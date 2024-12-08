@@ -20,13 +20,13 @@ public class ExerciseAnswer
     [MaxLength(50)]
     [ForeignKey("AssignmentSubmissionId")]
     public string AssignmentSubmissionId { get; set; }
-    public virtual AssignmentSubmission AssignmentSubmission { get; set; }
+    public virtual AssignmentSubmission? AssignmentSubmission { get; set; }
     
     [Required]
     [MaxLength(50)]
     [ForeignKey("ExerciseId")]
     public string ExerciseId { get; set; }
-    public virtual Exercise Exercise { get; set; }
+    public virtual Exercise? Exercise { get; set; }
 
     public ExerciseAnswer()
     {
