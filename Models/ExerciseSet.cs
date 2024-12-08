@@ -38,8 +38,9 @@ public class ExerciseSet
     public ExerciseSet()
     {
         Id = Guid.NewGuid().ToString();
-        Name ??= "";
-        SchoolType ??= "";
-        Subject ??= "";
+        Name ??= string.Empty;
+        SchoolType ??= string.Empty;
+        Subject ??= string.Empty;
+        Personalized ??= string.Empty;
     }
 }

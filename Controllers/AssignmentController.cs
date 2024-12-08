@@ -14,6 +14,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<Assignment, AssignmentDto>();
+        c.CreateMap<Class, ClassDto>();
     }));
 
     [HttpPost("Create")]
@@ -22,7 +23,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var classDb = await assignmentRepository.GetClassByIdAsync(assignmentCreatorDto.ClassId);
         
-        if (classDb is null) return NotFound("Class not found");
+        if (classDb is null) return NotFound("Class not found.");
         if (!classDb.OwnerId.Equals(userId)) 
             return Unauthorized("You are not authorized to create an assignment for this class.");
         
@@ -69,6 +70,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             return Unauthorized("You are not authorized to see this assignment.");
         
         var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
+        assignment.Class = _mapper.Map<ClassDto>(assignmentDb.Class);
         
         return Ok(assignment);
     }

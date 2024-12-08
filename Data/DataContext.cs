@@ -120,16 +120,16 @@ public class DataContext(IConfiguration config) : DbContext
             .WithMany(u => u.AssignmentSubmissions)
             .HasForeignKey(sub => sub.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<AssignmentSubmission>()
+            .HasMany(sub => sub.ExerciseAnswers)
+            .WithOne(ea => ea.AssignmentSubmission)
+            .HasForeignKey(ea => ea.AssignmentSubmissionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // ExerciseAnswer
         modelBuilder.Entity<ExerciseAnswer>()
             .HasKey(ea => ea.Id);
-
-        modelBuilder.Entity<ExerciseAnswer>()
-            .HasOne(ea => ea.AssignmentSubmission)
-            .WithOne(sub => sub.ExerciseAnswer)
-            .HasForeignKey<ExerciseAnswer>(ea => ea.AssignmentSubmissionId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ExerciseAnswer>()
             .HasOne(ea => ea.Exercise)

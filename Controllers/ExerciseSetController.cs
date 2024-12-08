@@ -13,7 +13,7 @@ namespace mathAi_backend.Controllers;
 [Route("[controller]")]
 public class ExerciseSetController(IConfiguration config, IExerciseSetRepository exerciseSetRepository) : ControllerBase
 {
-    private readonly OpenAiHelper _openAiHelper = new(config);
+    private readonly ChatClientHelper _chatClientHelper = new(config);
     
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
@@ -42,7 +42,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         
         try
         {
-            var client = _openAiHelper.CreateChatClient();
+            var client = _chatClientHelper.CreateChatClient();
 
             var exerciseSetName = "Zestaw Zadań";
 
@@ -61,7 +61,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             for (var i = 0; i < exerciseSetSettings.NumberOfExercises; i++)
             {
-                var chatCompletion = await OpenAiHelper.GenerateExercise(client, exerciseSetSettings);
+                var chatCompletion = await ChatClientHelper.GenerateExercise(client, exerciseSetSettings);
 
                 try
                 {
@@ -92,7 +92,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         
         try
         {
-            var client = _openAiHelper.CreateChatClient();
+            var client = _chatClientHelper.CreateChatClient();
 
             var exerciseSetDb = await exerciseSetRepository.GetExerciseSetByIdAsync(exerciseSetId);
 
@@ -112,7 +112,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
 
             for (var i = 0; i < exerciseSetGenerator.NumberOfExercises; i++)
             {
-                var chatCompletion = await OpenAiHelper.GenerateExercise(client, exerciseSetGenerator);
+                var chatCompletion = await ChatClientHelper.GenerateExercise(client, exerciseSetGenerator);
 
                 try
                 {

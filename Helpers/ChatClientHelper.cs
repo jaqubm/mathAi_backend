@@ -1,11 +1,13 @@
 using System.ClientModel;
+using System.Diagnostics.CodeAnalysis;
 using mathAi_backend.Dtos;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI.Assistants;
 using OpenAI.Chat;
 
 namespace mathAi_backend.Helpers;
 
-public class OpenAiHelper(IConfiguration config)
+public class ChatClientHelper(IConfiguration config)
 {
     public ChatClient CreateChatClient()
     {
@@ -76,5 +78,11 @@ public class OpenAiHelper(IConfiguration config)
                 jsonSchemaIsStrict: true
                 )
         };
+    }
+
+    [Experimental("OPENAI001")]
+    public AssistantClient CreateAssistantClient()
+    {
+        return new AssistantClient(apiKey: config.GetSection("AppSettings:OpenAiApiKey").Value ??= "");
     }
 }
