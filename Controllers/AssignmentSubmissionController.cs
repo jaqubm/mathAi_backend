@@ -14,7 +14,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
 {
     private readonly AssistantClientHelper _assistantClientHelper = new(config);
 
-    [HttpPut("Add")]
+    [HttpPut("AddExerciseAnswer")]
     public async Task<ActionResult<string>> AddExerciseAnswer([FromForm] ExerciseAnswerCreatorDto exerciseAnswerCreatorDto)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
@@ -65,6 +65,23 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         
         assignmentSubmissionRepository.UpdateEntity(assignmentSubmissionDb);
         
-        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when saving exercise asnwer occured.");
+        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when saving exercise answer occured.");
+    }
+
+    [HttpPut("MarkAsCompleted/{assignmentSubmissionId}")]
+    public async Task<ActionResult<string>> MarkAsCompleted([FromRoute] string assignmentSubmissionId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentSubmissionDb = await assignmentSubmissionRepository.GetAssignmentSubmissionByIdAsync(assignmentSubmissionId);
+        
+        if (assignmentSubmissionDb is null) return NotFound("AssignmentSubmission not found.");
+        if (!assignmentSubmissionDb.StudentId.Equals(userId)) 
+            return Unauthorized("You don't have permission to mark this assignment as completed.");
+        
+        assignmentSubmissionDb.Completed = true;
+        
+        assignmentSubmissionRepository.UpdateEntity(assignmentSubmissionDb);
+        
+        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when marking assignment as completed.");
     }
 }
