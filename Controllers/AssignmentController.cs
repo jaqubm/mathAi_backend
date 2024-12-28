@@ -72,6 +72,26 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
         assignment.Class = _mapper.Map<ClassDto>(assignmentDb.Class);
         
+        // TODO: To verify if it works!!!
+        foreach (var assignmentSubmissionDb in assignmentDb.Submissions)
+        {
+            if (!assignmentSubmissionDb.Completed) continue;
+            
+            var gradeSum = 0;
+            var gradeMaxSum = 0;
+            
+            foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswers)
+            {
+                if (exerciseAnswer.Grade is null) continue;
+                
+                gradeSum += exerciseAnswer.Grade.Value;
+                gradeMaxSum += 100;
+            }
+
+            var assignmentSubmission = assignment.Submissions.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
+            if (assignmentSubmission is not null) assignmentSubmission.Score = (float) gradeSum / gradeMaxSum;
+        }
+        
         return Ok(assignment);
     }
     

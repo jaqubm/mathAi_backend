@@ -52,6 +52,7 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             .Assignment
             .Include(a => a.Class)
             .Include(a => a.Submissions)
+            .ThenInclude(s => s.ExerciseAnswers)
             .FirstOrDefaultAsync(a => a.Id == assignmentId);
     }
 }
