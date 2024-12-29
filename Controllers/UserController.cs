@@ -26,8 +26,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
         
-        if (userDb is null)
-            return NotFound("User not found.");
+        if (userDb is null) return NotFound("User not found.");
         
         var user = _mapper.Map<UserDto>(userDb);
         
@@ -48,8 +47,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
         
-        if (userDb is null)
-            return Unauthorized("User does not exist!");
+        if (userDb is null) return Unauthorized("User does not exist!");
         
         userDb.IsTeacher = isTeacher;
         userDb.FirstTimeSignIn = false;
@@ -76,8 +74,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
         
-        if (userDb is null)
-            return Unauthorized("User does not exist!");
+        if (userDb is null) return Unauthorized("User does not exist!");
         
         var classListDb = userDb.IsTeacher switch
         {
@@ -98,8 +95,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
         
-        if (userDb is null)
-            return Unauthorized("User does not exist!");
+        if (userDb is null) return Unauthorized("User does not exist!");
+        if (userDb.IsTeacher) return Conflict("Teacher does not have any AssignmentSubmissions!");
         
         var assignmentSubmissionListDb = await userRepository.GetAssignmentSubmissionListByUserIdAsync(userId);
 
