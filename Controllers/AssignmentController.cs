@@ -82,13 +82,11 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             
             foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswers)
             {
-                if (exerciseAnswer.Grade is null) continue;
-                
-                gradeSum += exerciseAnswer.Grade.Value;
+                gradeSum += exerciseAnswer.Grade;
                 gradeMaxSum += 100;
             }
 
-            var assignmentSubmission = assignment.Submissions.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
+            var assignmentSubmission = assignment.AssignmentSubmissionList.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
             if (assignmentSubmission is not null) assignmentSubmission.Score = (float) gradeSum / gradeMaxSum;
         }
         
