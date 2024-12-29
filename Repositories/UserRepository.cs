@@ -68,4 +68,16 @@ public class UserRepository(IConfiguration config) : IUserRepository
         
         return classList;
     }
+
+    public async Task<List<AssignmentSubmission>> GetAssignmentSubmissionListByUserIdAsync(string userId)
+    {
+        var assignmentSubmissionList = await _entityFramework
+            .AssignmentSubmission
+            .Include(s => s.Assignment)
+            .ThenInclude(a => a.Class)
+            .Where(s => s.StudentId == userId)
+            .ToListAsync();
+        
+        return assignmentSubmissionList;
+    }
 }

@@ -1,6 +1,6 @@
 namespace mathAi_backend.Dtos;
 
-public class ExerciseSetListDto
+public class UserExerciseSetListDto
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";

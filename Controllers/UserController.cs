@@ -16,8 +16,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
     private readonly Mapper _mapper = new(new MapperConfiguration(c =>
     {
         c.CreateMap<User, UserDto>();
-        c.CreateMap<ExerciseSet, ExerciseSetListDto>();
-        c.CreateMap<Class, ClassListDto>();
+        c.CreateMap<ExerciseSet, UserExerciseSetListDto>();
+        c.CreateMap<Class, UserClassListDto>();
     })); 
 
     [HttpGet("Get")]
@@ -60,18 +60,18 @@ public class UserController(IUserRepository userRepository) : ControllerBase
     }
 
     [HttpGet("GetExerciseSetList")]
-    public async Task<ActionResult<List<ExerciseSetListDto>>> GetUserExerciseSetsList()
+    public async Task<ActionResult<List<UserExerciseSetListDto>>> GetUserExerciseSetsList()
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var exerciseSetsListDb = await userRepository.GetExerciseSetListByUserIdAsync(userId);
         
-        var exerciseSetsList = _mapper.Map<List<ExerciseSetListDto>>(exerciseSetsListDb);
+        var exerciseSetsList = _mapper.Map<List<UserExerciseSetListDto>>(exerciseSetsListDb);
         
         return Ok(exerciseSetsList);
     }
 
     [HttpGet("GetClassList")]
-    public async Task<ActionResult<List<ClassListDto>>> GetUserClassList()
+    public async Task<ActionResult<List<UserClassListDto>>> GetUserClassList()
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
         var userDb = await userRepository.GetUserByIdAsync(userId);
@@ -85,34 +85,43 @@ public class UserController(IUserRepository userRepository) : ControllerBase
             false => await userRepository.GetClassListByStudentIdAsync(userId)
         };
         
-        var classList = _mapper.Map<List<ClassListDto>>(classListDb);
+        var classList = _mapper.Map<List<UserClassListDto>>(classListDb);
         
         classList.ForEach(cl => cl.IsOwner = classListDb.Find(c => c.Id == cl.Id)?.Owner?.Id == userId);
         
         return Ok(classList);
     }
 
-    /*[HttpGet("GetAssignmentSubmissions/{email}")]
-    public async Task<ActionResult<List<AssignmentSubmission>>> GetAssignmentSubmissions([FromRoute] string email)
+    [HttpGet("GetAssignmentSubmissionList/")]
+    public async Task<ActionResult<List<UserAssignmentSubmissionListDto>>> GetUserAssignmentSubmissionList()
     {
-        var userDb = await userRepository.GetUserByEmailAsync(email);
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await userRepository.GetUserByIdAsync(userId);
         
         if (userDb is null)
-            return NotFound("User not found.");
+            return Unauthorized("User does not exist!");
         
-        var assignmentSubmissions = await userRepository.GetAssignmentSubmissionsByEmailAsync(email);
+        var assignmentSubmissionListDb = await userRepository.GetAssignmentSubmissionListByUserIdAsync(userId);
 
-        foreach (var assignmentSubmission in assignmentSubmissions)
-        {
-            assignmentSubmission.Assignment =
-                await assignmentRepository.GetAssignmentByIdAsync(assignmentSubmission.AssignmentId) ??
-                throw new InvalidOperationException();
-        }
+        var assignmentSubmissionList = new List<UserAssignmentSubmissionListDto>();
         
-        var sortedAssignmentSubmissions = assignmentSubmissions
-            .OrderBy(sub => sub.Assignment.DueDate)
+        assignmentSubmissionListDb.ForEach(s =>
+        {
+            assignmentSubmissionList.Add(new UserAssignmentSubmissionListDto
+            {
+                Id = s.Id,
+                Completed = s.Completed,
+                AssignmentId = s.AssignmentId,
+                ClassName = s.Assignment?.Class?.Name ?? throw new Exception("Class not found."),
+                StartDate = s.Assignment.StartDate,
+                DueDate = s.Assignment.DueDate
+            });
+        });
+        
+        var sortedAssignmentSubmissionList = assignmentSubmissionList
+            .OrderBy(s => s.DueDate)
             .ToList();
         
-        return Ok(sortedAssignmentSubmissions);
-    }*/
+        return Ok(sortedAssignmentSubmissionList);
+    }
 }
