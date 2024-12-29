@@ -9,12 +9,14 @@ public class ExerciseAnswer
     [MaxLength(50)]
     public string Id { get; set; }
     
-    [Required]
     [MaxLength(50)]
     public string AssistantId { get; set; }
     
-    public int? Grade { get; set; }
-    public string? Feedback { get; set; }
+    [Required]
+    public int Grade { get; set; }
+    
+    [Required]
+    public string Feedback { get; set; }
     
     [Required]
     [MaxLength(50)]

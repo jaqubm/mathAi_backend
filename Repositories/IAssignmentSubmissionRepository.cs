@@ -9,5 +9,7 @@ public interface IAssignmentSubmissionRepository
     public void UpdateEntity<T>(T entity);
     
     public Task<Exercise?> GetExerciseByIdAsync(string exerciseId);
+    public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
+    
     public Task<AssignmentSubmission?> GetAssignmentSubmissionByIdAsync(string assignmentSubmissionId);
 }

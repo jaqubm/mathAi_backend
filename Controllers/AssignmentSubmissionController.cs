@@ -75,8 +75,26 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         var assignmentSubmissionDb = await assignmentSubmissionRepository.GetAssignmentSubmissionByIdAsync(assignmentSubmissionId);
         
         if (assignmentSubmissionDb is null) return NotFound("AssignmentSubmission not found.");
+        if (assignmentSubmissionDb.Completed) return Conflict("AssignmentSubmission is already completed.");
+        if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
         if (!assignmentSubmissionDb.StudentId.Equals(userId)) 
             return Unauthorized("You don't have permission to mark this assignment as completed.");
+        
+        var exerciseSetDb = await assignmentSubmissionRepository.GetExerciseSetByIdAsync(assignmentSubmissionDb.Assignment.ExerciseSetId);
+        
+        if (exerciseSetDb is null) return NotFound("ExerciseSet not found.");
+        
+        foreach (var exercise in exerciseSetDb.Exercises)
+        {
+            if (assignmentSubmissionDb.ExerciseAnswers.All(x => x.ExerciseId != exercise.Id))
+            {
+                assignmentSubmissionDb.ExerciseAnswers.Add(new ExerciseAnswer
+                {
+                    AssignmentSubmissionId = assignmentSubmissionDb.Id,
+                    ExerciseId = exercise.Id,
+                });
+            }
+        }
         
         assignmentSubmissionDb.Completed = true;
         
