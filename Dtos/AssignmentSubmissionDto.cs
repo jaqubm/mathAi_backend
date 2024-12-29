@@ -3,9 +3,8 @@ namespace mathAi_backend.Dtos;
 public class AssignmentSubmissionDto
 {
     public string Id { get; set; } = string.Empty;
-    public DateTime? SubmissionDate { get; set; }
-    public bool Completed { get; set; }
-    public string StudentId { get; set; } = string.Empty;
-    public UserDto Student { get; set; } = new();
-    public ICollection<ExerciseAnswerDto> ExerciseAnswers { get; set; } = [];
+    public string AssignmentName { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+    public DateTime DueDate { get; set; }
+    public IEnumerable<ExerciseDto> ExerciseList { get; set; } = [];
 }

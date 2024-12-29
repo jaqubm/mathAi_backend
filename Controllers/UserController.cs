@@ -109,7 +109,8 @@ public class UserController(IUserRepository userRepository) : ControllerBase
                 Id = s.Id,
                 Completed = s.Completed,
                 AssignmentId = s.AssignmentId,
-                ClassName = s.Assignment?.Class?.Name ?? throw new Exception("Class not found."),
+                AssignmentName = s.Assignment?.Name ?? throw new Exception("Assignment not found!"),
+                ClassName = s.Assignment?.Class?.Name ?? throw new Exception("Class not found!"),
                 StartDate = s.Assignment.StartDate,
                 DueDate = s.Assignment.DueDate
             });

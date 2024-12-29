@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
@@ -13,6 +14,40 @@ namespace mathAi_backend.Controllers;
 public class AssignmentSubmissionController(IConfiguration config, IAssignmentSubmissionRepository assignmentSubmissionRepository) : ControllerBase
 {
     private readonly AssistantClientHelper _assistantClientHelper = new(config);
+    
+    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
+    {
+        c.CreateMap<Exercise, ExerciseDto>();
+    }));
+
+    [HttpGet("Get/{assignmentSubmissionId}")]
+    public async Task<ActionResult<AssignmentSubmissionDto>> GetAssignmentSubmission(string assignmentSubmissionId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentSubmissionDb = await assignmentSubmissionRepository.GetAssignmentSubmissionByIdAsync(assignmentSubmissionId);
+        
+        if (assignmentSubmissionDb is null) return NotFound("AssignmentSubmission not found.");
+        if (assignmentSubmissionDb.Completed) return Conflict("AssignmentSubmission is already completed.");
+        if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
+        if (!assignmentSubmissionDb.StudentId.Equals(userId)) 
+            return Unauthorized("You don't have permission to mark this assignment as completed.");
+        
+        var exerciseSetDb = await assignmentSubmissionRepository.GetExerciseSetByIdAsync(assignmentSubmissionDb.Assignment.ExerciseSetId);
+        
+        if (exerciseSetDb is null) return NotFound("ExerciseSet not found.");
+
+        var assignmentSubmission = new AssignmentSubmissionDto
+        {
+            Id = assignmentSubmissionDb.Id,
+            AssignmentName = assignmentSubmissionDb.Assignment.Name,
+            StartDate = assignmentSubmissionDb.Assignment.StartDate,
+            DueDate = assignmentSubmissionDb.Assignment.DueDate,
+            ExerciseList = _mapper.Map<IEnumerable<ExerciseDto>>(exerciseSetDb.Exercises)
+        };
+        
+        return Ok(assignmentSubmission);
+    }
+    
 
     [HttpPut("AddExerciseAnswer")]
     public async Task<ActionResult<string>> AddExerciseAnswer([FromForm] ExerciseAnswerCreatorDto exerciseAnswerCreatorDto)

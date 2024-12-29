@@ -21,8 +21,8 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         c.CreateMap<ExerciseSet, ExerciseSet>();
         c.CreateMap<ExerciseSetDto, ExerciseSet>();
         c.CreateMap<ExerciseSet, ExerciseSetDto>();
-        c.CreateMap<Exercise, ExerciseDto>();
-        c.CreateMap<ExerciseDto, Exercise>();
+        c.CreateMap<Exercise, ExerciseDetailedDto>();
+        c.CreateMap<ExerciseDetailedDto, Exercise>();
     })); 
     
     [AllowAnonymous]
