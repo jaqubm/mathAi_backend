@@ -8,5 +8,5 @@ public class ExerciseSetDto
     public string Subject { get; set; } = string.Empty;
     public string? Personalized  { get; set; } = string.Empty;
     public bool IsOwner { get; set; }
-    public IEnumerable<ExerciseDetailedDto> Exercises { get; set; } = [];
+    public IEnumerable<ExerciseDetailedDto> ExerciseList { get; set; } = [];
 }

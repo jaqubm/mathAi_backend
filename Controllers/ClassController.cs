@@ -77,7 +77,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         {
             var studentDb = await classRepository.GetUserByIdAsync(classStudent.StudentId);
             if (studentDb is null) continue;
-            cClass.Students.Add(_mapper.Map<UserDto>(studentDb));
+            cClass.StudentList.Add(_mapper.Map<UserDto>(studentDb));
         }
 
         return Ok(cClass);
