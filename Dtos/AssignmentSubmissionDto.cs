@@ -6,5 +6,5 @@ public class AssignmentSubmissionDto
     public string AssignmentName { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime DueDate { get; set; }
-    public IEnumerable<ExerciseDto> ExerciseList { get; set; } = [];
+    public ICollection<ExerciseDto> ExerciseList { get; set; } = [];
 }
