@@ -7,4 +7,5 @@ public class AssignmentSubmissionListDto
     public bool Completed { get; set; }
     public string StudentId { get; set; } = string.Empty;
     public UserDto Student { get; set; } = new();
+    public float? Score { get; set; }
 }

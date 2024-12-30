@@ -126,9 +126,9 @@ CREATE TABLE mathAi.[ExerciseAnswer]
     Id NVARCHAR(50) NOT NULL PRIMARY KEY,           -- Unique identifier for each answer entry
     AssignmentSubmissionId NVARCHAR(50) NOT NULL,   -- Foreign key linking to the AssignmentSubmission table
     ExerciseId NVARCHAR(50) NOT NULL,               -- Foreign key linking to the Exercise table
-    AssistantId NVARCHAR(50) NOT NULL,              -- ID of the OpenAI Assistant for grading and feedback
-    Grade INT,                                      -- Grade given by the OpenAI Assistant for the exercise
-    Feedback NVARCHAR(MAX) DEFAULT '',              -- Feedback provided by the OpenAI Assistant, default empty
+    AssistantId NVARCHAR(50),                       -- ID of the OpenAI Assistant for grading and feedback
+    Grade INT NOT NULL,                             -- Grade given by the OpenAI Assistant for the exercise
+    Feedback NVARCHAR(MAX) DEFAULT '' NOT NULL,     -- Feedback provided by the OpenAI Assistant, default empty
 
     CONSTRAINT FK_Submission_ExerciseAnswer FOREIGN KEY (AssignmentSubmissionId)
         REFERENCES mathAi.[AssignmentSubmission](Id)

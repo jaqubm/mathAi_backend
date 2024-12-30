@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
@@ -13,8 +14,42 @@ namespace mathAi_backend.Controllers;
 public class AssignmentSubmissionController(IConfiguration config, IAssignmentSubmissionRepository assignmentSubmissionRepository) : ControllerBase
 {
     private readonly AssistantClientHelper _assistantClientHelper = new(config);
+    
+    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
+    {
+        c.CreateMap<Exercise, ExerciseDto>();
+    }));
 
-    [HttpPut("Add")]
+    [HttpGet("Get/{assignmentSubmissionId}")]
+    public async Task<ActionResult<AssignmentSubmissionDto>> GetAssignmentSubmission(string assignmentSubmissionId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentSubmissionDb = await assignmentSubmissionRepository.GetAssignmentSubmissionByIdAsync(assignmentSubmissionId);
+        
+        if (assignmentSubmissionDb is null) return NotFound("AssignmentSubmission not found.");
+        if (assignmentSubmissionDb.Completed) return Conflict("AssignmentSubmission is already completed.");
+        if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
+        if (!assignmentSubmissionDb.StudentId.Equals(userId)) 
+            return Unauthorized("You don't have permission to mark this assignment as completed.");
+        
+        var exerciseSetDb = await assignmentSubmissionRepository.GetExerciseSetByIdAsync(assignmentSubmissionDb.Assignment.ExerciseSetId);
+        
+        if (exerciseSetDb is null) return NotFound("ExerciseSet not found.");
+
+        var assignmentSubmission = new AssignmentSubmissionDto
+        {
+            Id = assignmentSubmissionDb.Id,
+            AssignmentName = assignmentSubmissionDb.Assignment.Name,
+            StartDate = assignmentSubmissionDb.Assignment.StartDate,
+            DueDate = assignmentSubmissionDb.Assignment.DueDate,
+            ExerciseList = _mapper.Map<IEnumerable<ExerciseDto>>(exerciseSetDb.ExerciseList)
+        };
+        
+        return Ok(assignmentSubmission);
+    }
+    
+
+    [HttpPut("AddExerciseAnswer")]
     public async Task<ActionResult<string>> AddExerciseAnswer([FromForm] ExerciseAnswerCreatorDto exerciseAnswerCreatorDto)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
@@ -31,7 +66,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
         if (assignmentSubmissionDb.Assignment.StartDate < DateTime.Now) return Conflict("Time to provide answers has not started.");
         if (assignmentSubmissionDb.Assignment.DueDate > DateTime.Now) return Conflict("Time to provide answers has ended.");
-        if (assignmentSubmissionDb.ExerciseAnswers.Any(x => x.ExerciseId == exerciseAnswerCreatorDto.ExerciseId))
+        if (assignmentSubmissionDb.ExerciseAnswerList.Any(x => x.ExerciseId == exerciseAnswerCreatorDto.ExerciseId))
             return Conflict("An answer to this exercise already exists.");
         
         if (exerciseAnswerCreatorDto.AnswerImageFile is null || exerciseAnswerCreatorDto.AnswerImageFile.Length == 0)
@@ -61,10 +96,45 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
             ExerciseId = exerciseDb.Id
         };
         
-        assignmentSubmissionDb.ExerciseAnswers.Add(exerciseAnswer);
+        assignmentSubmissionDb.ExerciseAnswerList.Add(exerciseAnswer);
         
         assignmentSubmissionRepository.UpdateEntity(assignmentSubmissionDb);
         
-        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when saving exercise asnwer occured.");
+        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when saving exercise answer occured.");
+    }
+
+    [HttpPut("MarkAsCompleted/{assignmentSubmissionId}")]
+    public async Task<ActionResult<string>> MarkAsCompleted([FromRoute] string assignmentSubmissionId)
+    {
+        var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var assignmentSubmissionDb = await assignmentSubmissionRepository.GetAssignmentSubmissionByIdAsync(assignmentSubmissionId);
+        
+        if (assignmentSubmissionDb is null) return NotFound("AssignmentSubmission not found.");
+        if (assignmentSubmissionDb.Completed) return Conflict("AssignmentSubmission is already completed.");
+        if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
+        if (!assignmentSubmissionDb.StudentId.Equals(userId)) 
+            return Unauthorized("You don't have permission to mark this assignment as completed.");
+        
+        var exerciseSetDb = await assignmentSubmissionRepository.GetExerciseSetByIdAsync(assignmentSubmissionDb.Assignment.ExerciseSetId);
+        
+        if (exerciseSetDb is null) return NotFound("ExerciseSet not found.");
+        
+        foreach (var exercise in exerciseSetDb.ExerciseList)
+        {
+            if (assignmentSubmissionDb.ExerciseAnswerList.All(x => x.ExerciseId != exercise.Id))
+            {
+                assignmentSubmissionDb.ExerciseAnswerList.Add(new ExerciseAnswer
+                {
+                    AssignmentSubmissionId = assignmentSubmissionDb.Id,
+                    ExerciseId = exercise.Id,
+                });
+            }
+        }
+        
+        assignmentSubmissionDb.Completed = true;
+        
+        assignmentSubmissionRepository.UpdateEntity(assignmentSubmissionDb);
+        
+        return await assignmentSubmissionRepository.SaveChangesAsync() ? Ok() : Problem("An error when marking assignment as completed.");
     }
 }

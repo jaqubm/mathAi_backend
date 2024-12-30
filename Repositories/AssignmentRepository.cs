@@ -35,7 +35,7 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
     {
         return await _entityFramework
             .Class
-            .Include(c => c.ClassStudents)
+            .Include(c => c.ClassStudentList)
             .FirstOrDefaultAsync(c => c.Id == classId);
     }
 
@@ -51,7 +51,8 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
         return await _entityFramework
             .Assignment
             .Include(a => a.Class)
-            .Include(a => a.Submissions)
+            .Include(a => a.AssignmentSubmissionList)
+            .ThenInclude(s => s.ExerciseAnswerList)
             .FirstOrDefaultAsync(a => a.Id == assignmentId);
     }
 }

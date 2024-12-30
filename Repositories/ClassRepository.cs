@@ -50,8 +50,8 @@ public class ClassRepository(IConfiguration config) : IClassRepository
         return await _entityFramework
             .Class
             .Include(c => c.Owner)
-            .Include(c => c.ClassStudents)
-            .Include(c => c.Assignments)
+            .Include(c => c.ClassStudentList)
+            .Include(c => c.AssignmentList)
             .FirstOrDefaultAsync(c => c.Id == classId);
     }
 }

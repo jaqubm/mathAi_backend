@@ -46,9 +46,9 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         
         await assignmentRepository.AddEntityAsync(assignment);
         
-        classDb.ClassStudents.ForEach(cs =>
+        classDb.ClassStudentList.ForEach(cs =>
         {
-            assignment.Submissions.Add(new AssignmentSubmission
+            assignment.AssignmentSubmissionList.Add(new AssignmentSubmission
             {
                 AssignmentId = assignment.Id,
                 StudentId = cs.StudentId,
@@ -66,11 +66,29 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         
         if (assignmentDb is null) return NotFound("Assignment not found.");
         if (assignmentDb.Class is null) return NotFound("Class not found.");
-        if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.Submissions.All(s => s.StudentId != userId)) 
+        if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.AssignmentSubmissionList.All(s => s.StudentId != userId)) 
             return Unauthorized("You are not authorized to see this assignment.");
         
         var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
         assignment.Class = _mapper.Map<ClassDto>(assignmentDb.Class);
+        
+        // TODO: To verify if it works!!!
+        foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
+        {
+            if (!assignmentSubmissionDb.Completed) continue;
+            
+            var gradeSum = 0;
+            var gradeMaxSum = 0;
+            
+            foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswerList)
+            {
+                gradeSum += exerciseAnswer.Grade;
+                gradeMaxSum += 100;
+            }
+
+            var assignmentSubmission = assignment.AssignmentSubmissionList.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
+            if (assignmentSubmission is not null) assignmentSubmission.Score = (float) gradeSum / gradeMaxSum;
+        }
         
         return Ok(assignment);
     }

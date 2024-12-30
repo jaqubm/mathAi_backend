@@ -1,8 +1,6 @@
 using System.ClientModel;
-using System.Diagnostics.CodeAnalysis;
 using mathAi_backend.Dtos;
 using Microsoft.IdentityModel.Tokens;
-using OpenAI.Assistants;
 using OpenAI.Chat;
 
 namespace mathAi_backend.Helpers;

@@ -26,12 +26,20 @@ public class AssignmentSubmissionRepository(IConfiguration config) : IAssignment
             .FindAsync(exerciseId);
     }
 
+    public async Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId)
+    {
+        return await _entityFramework
+            .ExerciseSet
+            .Include(exerciseSet => exerciseSet.ExerciseList)
+            .FirstOrDefaultAsync(exerciseSet => exerciseSet.Id == exerciseSetId);
+    }
+
     public async Task<AssignmentSubmission?> GetAssignmentSubmissionByIdAsync(string assignmentSubmissionId)
     {
         return await _entityFramework
             .AssignmentSubmission
             .Include(assignmentSubmission => assignmentSubmission.Assignment)
-            .Include(assignmentSubmission => assignmentSubmission.ExerciseAnswers)
+            .Include(assignmentSubmission => assignmentSubmission.ExerciseAnswerList)
             .FirstOrDefaultAsync(assignmentSubmission => assignmentSubmission.Id == assignmentSubmissionId);
     }
 }

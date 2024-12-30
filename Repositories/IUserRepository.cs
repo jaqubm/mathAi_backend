@@ -15,4 +15,6 @@ public interface IUserRepository
     
     public Task<List<Class>> GetClassListByOwnerIdAsync(string ownerId);
     public Task<List<Class>> GetClassListByStudentIdAsync(string userId);
+    
+    public Task<List<AssignmentSubmission>> GetAssignmentSubmissionListByUserIdAsync(string userId);
 }
