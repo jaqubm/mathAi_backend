@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace mathAi_backend.Dtos;
 
 public class ClassDto

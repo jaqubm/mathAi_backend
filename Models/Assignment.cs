@@ -32,7 +32,7 @@ public class Assignment
     public string ExerciseSetId { get; set; }
     public virtual ExerciseSet? ExerciseSet { get; set; }
     
-    public virtual ICollection<AssignmentSubmission> Submissions { get; set; } = [];
+    public virtual ICollection<AssignmentSubmission> AssignmentSubmissionList { get; set; } = [];
 
 
     public Assignment()

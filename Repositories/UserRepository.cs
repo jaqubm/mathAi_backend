@@ -50,7 +50,7 @@ public class UserRepository(IConfiguration config) : IUserRepository
         var classList = await _entityFramework
             .Class
             .Include(c => c.Owner)
-            .Include(c => c.ClassStudents)
+            .Include(c => c.ClassStudentList)
             .Where(c => c.OwnerId == ownerId)
             .ToListAsync();
         
@@ -62,8 +62,8 @@ public class UserRepository(IConfiguration config) : IUserRepository
         var classList = await _entityFramework
             .Class
             .Include(c => c.Owner)
-            .Include(c => c.ClassStudents)
-            .Where(c => c.ClassStudents.Any(s => s.StudentId == userId))
+            .Include(c => c.ClassStudentList)
+            .Where(c => c.ClassStudentList.Any(s => s.StudentId == userId))
             .ToListAsync();
         
         return classList;

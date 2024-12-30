@@ -30,7 +30,7 @@ public class AssignmentSubmissionRepository(IConfiguration config) : IAssignment
     {
         return await _entityFramework
             .ExerciseSet
-            .Include(exerciseSet => exerciseSet.Exercises)
+            .Include(exerciseSet => exerciseSet.ExerciseList)
             .FirstOrDefaultAsync(exerciseSet => exerciseSet.Id == exerciseSetId);
     }
 
@@ -39,7 +39,7 @@ public class AssignmentSubmissionRepository(IConfiguration config) : IAssignment
         return await _entityFramework
             .AssignmentSubmission
             .Include(assignmentSubmission => assignmentSubmission.Assignment)
-            .Include(assignmentSubmission => assignmentSubmission.ExerciseAnswers)
+            .Include(assignmentSubmission => assignmentSubmission.ExerciseAnswerList)
             .FirstOrDefaultAsync(assignmentSubmission => assignmentSubmission.Id == assignmentSubmissionId);
     }
 }

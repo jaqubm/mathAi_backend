@@ -40,7 +40,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
             var studentDb = await classRepository.GetUserByEmailAsync(studentEmail);
 
             if (studentDb is null || userDb.FirstTimeSignIn || studentDb.IsTeacher || userDb.Email.Equals(studentDb.Email)) continue;
-            if (newClass.ClassStudents.Exists(c => c.StudentId.Equals(studentDb.Email))) continue;
+            if (newClass.ClassStudentList.Exists(c => c.StudentId.Equals(studentDb.Email))) continue;
             
             var classStudent = new ClassStudent
             {
@@ -48,7 +48,7 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
                 StudentId = studentDb.Id
             };
             
-            newClass.ClassStudents.Add(classStudent);
+            newClass.ClassStudentList.Add(classStudent);
         }
         
         await classRepository.AddEntityAsync(newClass);
@@ -67,13 +67,13 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         var classDb = await classRepository.GetClassByIdAsync(classId);
 
         if (classDb is null) return NotFound("Class with given ID not found.");
-        if (!string.Equals(classDb.OwnerId, userId) && !classDb.ClassStudents.Exists(cs => string.Equals(cs.StudentId, userId))) 
+        if (!string.Equals(classDb.OwnerId, userId) && !classDb.ClassStudentList.Exists(cs => string.Equals(cs.StudentId, userId))) 
             return Unauthorized("User is not allowed to access this class.");
         
         var cClass = _mapper.Map<ClassDto>(classDb);
         if (classDb.OwnerId.Equals(userId)) cClass.IsOwner = true;
 
-        foreach (var classStudent in classDb.ClassStudents)
+        foreach (var classStudent in classDb.ClassStudentList)
         {
             var studentDb = await classRepository.GetUserByIdAsync(classStudent.StudentId);
             if (studentDb is null) continue;
@@ -131,16 +131,16 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         var classDb = await classRepository.GetClassByIdAsync(classId);
 
         if (classDb is null) return NotFound("Class with given ID was not found.");
-        if (classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(studentDb.Id))) 
+        if (classDb.ClassStudentList.Exists(cs => cs.StudentId.Equals(studentDb.Id))) 
             return BadRequest($"Student {studentDb.Name} is already a part of {classDb.Name} class.");
 
-        classDb.ClassStudents.Add(new ClassStudent
+        classDb.ClassStudentList.Add(new ClassStudent
         {
             ClassId = classDb.Id,
             StudentId = studentDb.Id
         });
 
-        foreach (var assignmentSubmission in from assignment in classDb.Assignments
+        foreach (var assignmentSubmission in from assignment in classDb.AssignmentList
                  where DateTime.Now < assignment.DueDate
                  select new AssignmentSubmission
                  {
@@ -173,11 +173,11 @@ public class ClassController(IClassRepository classRepository) : ControllerBase
         
         if (studentDb is null) return BadRequest("Student account with given email does not exist.");
         if (classDb.OwnerId.Equals(studentDb.Id)) return BadRequest("Owner can not be removed from class.");
-        if (!classDb.ClassStudents.Exists(cs => cs.StudentId.Equals(studentDb.Id))) return NotFound($"Student {userDb.Name} is no part of {classDb.Name} class therefore he can not be removed.");
+        if (!classDb.ClassStudentList.Exists(cs => cs.StudentId.Equals(studentDb.Id))) return NotFound($"Student {userDb.Name} is no part of {classDb.Name} class therefore he can not be removed.");
 
         classDb
-            .ClassStudents
-            .Remove(classDb.ClassStudents
+            .ClassStudentList
+            .Remove(classDb.ClassStudentList
                 .Find(cs => cs.StudentId.Equals(studentDb.Id)) 
                     ?? throw new InvalidOperationException());
 

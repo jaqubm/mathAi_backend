@@ -42,7 +42,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
             AssignmentName = assignmentSubmissionDb.Assignment.Name,
             StartDate = assignmentSubmissionDb.Assignment.StartDate,
             DueDate = assignmentSubmissionDb.Assignment.DueDate,
-            ExerciseList = _mapper.Map<IEnumerable<ExerciseDto>>(exerciseSetDb.Exercises)
+            ExerciseList = _mapper.Map<IEnumerable<ExerciseDto>>(exerciseSetDb.ExerciseList)
         };
         
         return Ok(assignmentSubmission);
@@ -66,7 +66,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         if (assignmentSubmissionDb.Assignment is null) return NotFound("Assignment not found.");
         if (assignmentSubmissionDb.Assignment.StartDate < DateTime.Now) return Conflict("Time to provide answers has not started.");
         if (assignmentSubmissionDb.Assignment.DueDate > DateTime.Now) return Conflict("Time to provide answers has ended.");
-        if (assignmentSubmissionDb.ExerciseAnswers.Any(x => x.ExerciseId == exerciseAnswerCreatorDto.ExerciseId))
+        if (assignmentSubmissionDb.ExerciseAnswerList.Any(x => x.ExerciseId == exerciseAnswerCreatorDto.ExerciseId))
             return Conflict("An answer to this exercise already exists.");
         
         if (exerciseAnswerCreatorDto.AnswerImageFile is null || exerciseAnswerCreatorDto.AnswerImageFile.Length == 0)
@@ -96,7 +96,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
             ExerciseId = exerciseDb.Id
         };
         
-        assignmentSubmissionDb.ExerciseAnswers.Add(exerciseAnswer);
+        assignmentSubmissionDb.ExerciseAnswerList.Add(exerciseAnswer);
         
         assignmentSubmissionRepository.UpdateEntity(assignmentSubmissionDb);
         
@@ -119,11 +119,11 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         
         if (exerciseSetDb is null) return NotFound("ExerciseSet not found.");
         
-        foreach (var exercise in exerciseSetDb.Exercises)
+        foreach (var exercise in exerciseSetDb.ExerciseList)
         {
-            if (assignmentSubmissionDb.ExerciseAnswers.All(x => x.ExerciseId != exercise.Id))
+            if (assignmentSubmissionDb.ExerciseAnswerList.All(x => x.ExerciseId != exercise.Id))
             {
-                assignmentSubmissionDb.ExerciseAnswers.Add(new ExerciseAnswer
+                assignmentSubmissionDb.ExerciseAnswerList.Add(new ExerciseAnswer
                 {
                     AssignmentSubmissionId = assignmentSubmissionDb.Id,
                     ExerciseId = exercise.Id,

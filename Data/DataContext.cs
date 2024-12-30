@@ -55,7 +55,7 @@ public class DataContext(IConfiguration config) : DbContext
 
         modelBuilder.Entity<Exercise>()
             .HasOne(e => e.ExerciseSet)
-            .WithMany(es => es.Exercises)
+            .WithMany(es => es.ExerciseList)
             .HasForeignKey(e => e.ExerciseSetId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -75,7 +75,7 @@ public class DataContext(IConfiguration config) : DbContext
 
         modelBuilder.Entity<ClassStudent>()
             .HasOne(cs => cs.Class)
-            .WithMany(c => c.ClassStudents)
+            .WithMany(c => c.ClassStudentList)
             .HasForeignKey(cs => cs.ClassId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -95,7 +95,7 @@ public class DataContext(IConfiguration config) : DbContext
 
         modelBuilder.Entity<Assignment>()
             .HasOne(a => a.Class)
-            .WithMany(c => c.Assignments)
+            .WithMany(c => c.AssignmentList)
             .HasForeignKey(a => a.ClassId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -111,7 +111,7 @@ public class DataContext(IConfiguration config) : DbContext
 
         modelBuilder.Entity<AssignmentSubmission>()
             .HasOne(sub => sub.Assignment)
-            .WithMany(a => a.Submissions)
+            .WithMany(a => a.AssignmentSubmissionList)
             .HasForeignKey(sub => sub.AssignmentId)
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -122,7 +122,7 @@ public class DataContext(IConfiguration config) : DbContext
             .OnDelete(DeleteBehavior.Restrict);
         
         modelBuilder.Entity<AssignmentSubmission>()
-            .HasMany(sub => sub.ExerciseAnswers)
+            .HasMany(sub => sub.ExerciseAnswerList)
             .WithOne(ea => ea.AssignmentSubmission)
             .HasForeignKey(ea => ea.AssignmentSubmissionId)
             .OnDelete(DeleteBehavior.Cascade);

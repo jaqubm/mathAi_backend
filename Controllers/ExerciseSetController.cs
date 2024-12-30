@@ -67,7 +67,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
                 {
                     var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSet.Id);
 
-                    exerciseSet.Exercises.Add(exercise);
+                    exerciseSet.ExerciseList.Add(exercise);
                 }
                 catch
                 {
@@ -118,7 +118,7 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
                 {
                     var exercise = new Exercise(chatCompletion.Value.Content[0].Text, exerciseSetDb.Id);
 
-                    exerciseSetDb.Exercises.Add(exercise);
+                    exerciseSetDb.ExerciseList.Add(exercise);
                 }
                 catch
                 {
@@ -157,9 +157,9 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
             UserId = userId,
         };
 
-        foreach (var copiedExercise in exerciseSetDb.Exercises.Select(exercise => new Exercise(exercise)))
+        foreach (var copiedExercise in exerciseSetDb.ExerciseList.Select(exercise => new Exercise(exercise)))
         {
-            copiedExerciseSet.Exercises.Add(copiedExercise);
+            copiedExerciseSet.ExerciseList.Add(copiedExercise);
         }
         
         await exerciseSetRepository.AddEntityAsync(copiedExerciseSet);
@@ -189,6 +189,8 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         
         var exerciseSet = _mapper.Map<ExerciseSetDto>(exerciseSetDb);
         if (exerciseSetDb.UserId is not null && exerciseSetDb.UserId.Equals(userId)) exerciseSet.IsOwner = true;
+
+        Console.WriteLine(exerciseSet.ExerciseList.Count());
         
         return Ok(exerciseSet);
     }

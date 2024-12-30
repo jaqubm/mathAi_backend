@@ -45,7 +45,7 @@ public class ExerciseSetRepository(IConfiguration config) : IExerciseSetReposito
     {
         return await _entityFramework
             .ExerciseSet
-            .Include(es => es.Exercises)
+            .Include(es => es.ExerciseList)
             .FirstOrDefaultAsync(es => es.Id == exerciseSetId);
     }
 }

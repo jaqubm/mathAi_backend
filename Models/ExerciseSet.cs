@@ -33,7 +33,7 @@ public class ExerciseSet
     public string? UserId { get; set; }
     public virtual User? User { get; set; }
 
-    public virtual ICollection<Exercise> Exercises { get; set; } = [];
+    public virtual ICollection<Exercise> ExerciseList { get; set; } = [];
 
     public ExerciseSet()
     {
