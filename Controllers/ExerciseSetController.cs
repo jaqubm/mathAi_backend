@@ -189,8 +189,6 @@ public class ExerciseSetController(IConfiguration config, IExerciseSetRepository
         
         var exerciseSet = _mapper.Map<ExerciseSetDto>(exerciseSetDb);
         if (exerciseSetDb.UserId is not null && exerciseSetDb.UserId.Equals(userId)) exerciseSet.IsOwner = true;
-
-        Console.WriteLine(exerciseSet.ExerciseList.Count());
         
         return Ok(exerciseSet);
     }
