@@ -11,12 +11,6 @@ namespace mathAi_backend.Controllers;
 [Route("[controller]")]
 public class AssignmentController(IAssignmentRepository assignmentRepository) : ControllerBase
 {
-    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
-    {
-        c.CreateMap<Assignment, AssignmentDto>();
-        c.CreateMap<Class, ClassDto>();
-    }));
-
     [HttpPost("Create")]
     public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentCreatorDto assignmentCreatorDto)
     {
@@ -68,9 +62,16 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         if (assignmentDb.Class is null) return NotFound("Class not found.");
         if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.AssignmentSubmissionList.All(s => s.StudentId != userId)) 
             return Unauthorized("You are not authorized to see this assignment.");
-        
-        var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
-        assignment.Class = _mapper.Map<ClassDto>(assignmentDb.Class);
+
+        var assignment = new AssignmentDto
+        {
+            Name = assignmentDb.Name,
+            StartDate = assignmentDb.StartDate,
+            DueDate = assignmentDb.DueDate,
+            ClassId = assignmentDb.Class.Id,
+            ClassName = assignmentDb.Class.Name,
+            ExerciseSetId = assignmentDb.ExerciseSetId
+        };
         
         // TODO: To verify if it works!!!
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
