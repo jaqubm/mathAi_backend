@@ -93,6 +93,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         var exerciseAnswer = new ExerciseAnswer
         {
             AssistantId = assistant.Id,
+            FileId = uploadedAnswerImage.Id,
             Grade = grade,
             Feedback = feedback,
             AssignmentSubmissionId = assignmentSubmissionDb.Id,
