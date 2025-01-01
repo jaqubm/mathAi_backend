@@ -56,6 +56,11 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
     public async Task<ActionResult<AssignmentDto>> GetAssignment(string assignmentId)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await assignmentRepository.GetUserByIdAsync(userId);
+        
+        if (userDb is null) return NotFound("User not found.");
+        if (!userDb.IsTeacher) return Unauthorized("You are not authorized to see this assignment.");
+        
         var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
         if (assignmentDb is null) return NotFound("Assignment not found.");
@@ -73,11 +78,8 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             ExerciseSetId = assignmentDb.ExerciseSetId
         };
         
-        // TODO: To verify if it works!!!
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
         {
-            if (!assignmentSubmissionDb.Completed) continue;
-            
             var gradeSum = 0;
             var gradeMaxSum = 0;
             
@@ -86,9 +88,28 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
                 gradeSum += exerciseAnswer.Grade;
                 gradeMaxSum += 100;
             }
+            
+            var studentDb = await assignmentRepository.GetUserByIdAsync(assignmentSubmissionDb.StudentId);
+            
+            if (studentDb is null) return NotFound("Student not found.");
 
-            var assignmentSubmission = assignment.AssignmentSubmissionList.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
-            if (assignmentSubmission is not null) assignmentSubmission.Score = (float) gradeSum / gradeMaxSum;
+            var assignmentSubmission = new AssignmentSubmissionListDto
+            {
+                Id = assignmentSubmissionDb.Id,
+                SubmissionDate = assignmentSubmissionDb.SubmissionDate,
+                Completed = assignmentSubmissionDb.Completed,
+                StudentId = assignmentSubmissionDb.StudentId,
+                Student = new UserDto
+                {
+                    Email = studentDb.Email,
+                    Name = studentDb.Name,
+                    IsTeacher = studentDb.IsTeacher,
+                    FirstTimeSignIn = studentDb.FirstTimeSignIn
+                },
+                Score = (float)gradeSum / gradeMaxSum
+            };
+            
+            assignment.AssignmentSubmissionList.Add(assignmentSubmission);
         }
         
         return Ok(assignment);
