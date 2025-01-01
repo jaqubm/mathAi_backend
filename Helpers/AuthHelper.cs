@@ -9,7 +9,7 @@ public static class AuthHelper
 {
     private static async Task<string> GetAccessTokenFromHttpContext(HttpContext httpContext)
     {
-        return await httpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token") ?? throw new Exception("No access_token found!");
+        return await httpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token") ?? throw new UnauthorizedAccessException("No access token found!");
     }
     
     public static async Task<string> GetUserIdFromGoogleJwtTokenAsync(HttpContext httpContext)

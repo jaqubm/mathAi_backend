@@ -117,7 +117,7 @@ public class UserController(IUserRepository userRepository) : ControllerBase
         });
         
         var sortedAssignmentSubmissionList = assignmentSubmissionList
-            .OrderBy(s => s.DueDate)
+            .OrderByDescending(s => s.DueDate)
             .ToList();
         
         return Ok(sortedAssignmentSubmissionList);

@@ -11,12 +11,6 @@ namespace mathAi_backend.Controllers;
 [Route("[controller]")]
 public class AssignmentController(IAssignmentRepository assignmentRepository) : ControllerBase
 {
-    private readonly Mapper _mapper = new(new MapperConfiguration(c =>
-    {
-        c.CreateMap<Assignment, AssignmentDto>();
-        c.CreateMap<Class, ClassDto>();
-    }));
-
     [HttpPost("Create")]
     public async Task<ActionResult<string>> CreateAssignment([FromBody] AssignmentCreatorDto assignmentCreatorDto)
     {
@@ -62,32 +56,61 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
     public async Task<ActionResult<AssignmentDto>> GetAssignment(string assignmentId)
     {
         var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var userDb = await assignmentRepository.GetUserByIdAsync(userId);
+        
+        if (userDb is null) return NotFound("User not found.");
+        if (!userDb.IsTeacher) return Unauthorized("You are not authorized to see this assignment.");
+        
         var assignmentDb = await assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         
         if (assignmentDb is null) return NotFound("Assignment not found.");
         if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (assignmentDb.ExerciseSet is null) return NotFound("Exercise set not found.");
         if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.AssignmentSubmissionList.All(s => s.StudentId != userId)) 
             return Unauthorized("You are not authorized to see this assignment.");
+
+        var assignment = new AssignmentDto
+        {
+            Name = assignmentDb.Name,
+            StartDate = assignmentDb.StartDate,
+            DueDate = assignmentDb.DueDate,
+            ClassId = assignmentDb.Class.Id,
+            ClassName = assignmentDb.Class.Name,
+            ExerciseSetId = assignmentDb.ExerciseSetId
+        };
         
-        var assignment = _mapper.Map<AssignmentDto>(assignmentDb);
-        assignment.Class = _mapper.Map<ClassDto>(assignmentDb.Class);
-        
-        // TODO: To verify if it works!!!
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
         {
-            if (!assignmentSubmissionDb.Completed) continue;
-            
             var gradeSum = 0;
-            var gradeMaxSum = 0;
+            var gradeMaxSum = assignmentDb.ExerciseSet.ExerciseList.Count * 100;
             
             foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswerList)
             {
                 gradeSum += exerciseAnswer.Grade;
                 gradeMaxSum += 100;
             }
+            
+            var studentDb = await assignmentRepository.GetUserByIdAsync(assignmentSubmissionDb.StudentId);
+            
+            if (studentDb is null) return NotFound("Student not found.");
 
-            var assignmentSubmission = assignment.AssignmentSubmissionList.FirstOrDefault(s => s.Id == assignmentSubmissionDb.AssignmentId);
-            if (assignmentSubmission is not null) assignmentSubmission.Score = (float) gradeSum / gradeMaxSum;
+            var assignmentSubmission = new AssignmentSubmissionListDto
+            {
+                Id = assignmentSubmissionDb.Id,
+                SubmissionDate = assignmentSubmissionDb.SubmissionDate,
+                Completed = assignmentSubmissionDb.Completed,
+                StudentId = assignmentSubmissionDb.StudentId,
+                Student = new UserDto
+                {
+                    Email = studentDb.Email,
+                    Name = studentDb.Name,
+                    IsTeacher = studentDb.IsTeacher,
+                    FirstTimeSignIn = studentDb.FirstTimeSignIn
+                },
+                Score = (float)gradeSum / gradeMaxSum
+            };
+            
+            assignment.AssignmentSubmissionList.Add(assignmentSubmission);
         }
         
         return Ok(assignment);

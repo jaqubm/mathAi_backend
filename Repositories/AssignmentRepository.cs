@@ -31,6 +31,13 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
             _entityFramework.Remove(entity);
     }
 
+    public async Task<User?> GetUserByIdAsync(string userId)
+    {
+        return await _entityFramework
+            .User
+            .FindAsync(userId);
+    }
+
     public async Task<Class?> GetClassByIdAsync(string classId)
     {
         return await _entityFramework
@@ -51,6 +58,8 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
         return await _entityFramework
             .Assignment
             .Include(a => a.Class)
+            .Include(a => a.ExerciseSet)
+            .ThenInclude(s => s.ExerciseList)
             .Include(a => a.AssignmentSubmissionList)
             .ThenInclude(s => s.ExerciseAnswerList)
             .FirstOrDefaultAsync(a => a.Id == assignmentId);
