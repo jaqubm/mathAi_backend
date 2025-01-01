@@ -11,5 +11,7 @@ public interface IAssignmentSubmissionRepository
     public Task<Exercise?> GetExerciseByIdAsync(string exerciseId);
     public Task<ExerciseSet?> GetExerciseSetByIdAsync(string exerciseSetId);
     
+    public Task<ICollection<ExerciseAnswer>> GetExerciseAnswerListByAssignmentSubmissionIdAsync(string assignmentSubmissionId);
+    
     public Task<AssignmentSubmission?> GetAssignmentSubmissionByIdAsync(string assignmentSubmissionId);
 }
