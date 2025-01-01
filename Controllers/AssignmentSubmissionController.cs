@@ -50,6 +50,25 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         
         return Ok(assignmentSubmission);
     }
+
+    [HttpGet("GetExerciseAnswerList/{assignmentSubmissionId}")]
+    public async Task<ActionResult<List<ExerciseAnswerDto>>> GetExerciseAnswerList([FromRoute] string assignmentSubmissionId)
+    {
+        // TODO: Make better validation so that only teacher can see the results!
+        // var userId = await AuthHelper.GetUserIdFromGoogleJwtTokenAsync(HttpContext);
+        var exerciseAnswerListDb = await assignmentSubmissionRepository.GetExerciseAnswerListByAssignmentSubmissionIdAsync(assignmentSubmissionId);
+        
+        var exerciseAnswerList = exerciseAnswerListDb
+            .Select(exerciseAnswerDb => new ExerciseAnswerDto
+            {
+                Id = exerciseAnswerDb.Id, 
+                ExerciseId = exerciseAnswerDb.ExerciseId, 
+                Grade = exerciseAnswerDb.Grade, 
+                Feedback = exerciseAnswerDb.Feedback
+            }).ToList();
+
+        return Ok(exerciseAnswerList);
+    }
     
 
     [HttpPut("AddExerciseAnswer")]
@@ -93,6 +112,7 @@ public class AssignmentSubmissionController(IConfiguration config, IAssignmentSu
         var exerciseAnswer = new ExerciseAnswer
         {
             AssistantId = assistant.Id,
+            FileId = uploadedAnswerImage.Id,
             Grade = grade,
             Feedback = feedback,
             AssignmentSubmissionId = assignmentSubmissionDb.Id,

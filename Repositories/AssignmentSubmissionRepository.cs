@@ -34,6 +34,14 @@ public class AssignmentSubmissionRepository(IConfiguration config) : IAssignment
             .FirstOrDefaultAsync(exerciseSet => exerciseSet.Id == exerciseSetId);
     }
 
+    public async Task<ICollection<ExerciseAnswer>> GetExerciseAnswerListByAssignmentSubmissionIdAsync(string assignmentSubmissionId)
+    {
+        return await _entityFramework
+            .ExerciseAnswer
+            .Where(exerciseAnswer => exerciseAnswer.AssignmentSubmissionId == assignmentSubmissionId)
+            .ToListAsync();
+    }
+
     public async Task<AssignmentSubmission?> GetAssignmentSubmissionByIdAsync(string assignmentSubmissionId)
     {
         return await _entityFramework

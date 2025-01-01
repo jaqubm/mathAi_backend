@@ -12,6 +12,9 @@ public class ExerciseAnswer
     [MaxLength(50)]
     public string AssistantId { get; set; }
     
+    [MaxLength(50)]
+    public string FileId { get; set; }
+    
     [Required]
     public int Grade { get; set; }
     
