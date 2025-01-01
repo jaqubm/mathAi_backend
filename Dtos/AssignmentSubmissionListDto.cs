@@ -8,4 +8,5 @@ public class AssignmentSubmissionListDto
     public string StudentId { get; set; } = string.Empty;
     public UserDto Student { get; set; } = new();
     public float Score { get; set; }
+    public ICollection<ExerciseAnswerDto> ExerciseAnswerList { get; set; } = [];
 }

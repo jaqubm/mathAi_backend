@@ -1,4 +1,3 @@
-using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
@@ -76,20 +75,22 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             DueDate = assignmentDb.DueDate,
             ClassId = assignmentDb.Class.Id,
             ClassName = assignmentDb.Class.Name,
-            ExerciseSetId = assignmentDb.ExerciseSetId
+            ExerciseSetId = assignmentDb.ExerciseSetId,
+            ExerciseList = assignmentDb
+                .ExerciseSet
+                .ExerciseList
+                .Select(exercise => new ExerciseDto 
+                {
+                    Id = exercise.Id,
+                    Content = exercise.Content
+                }).ToList()
         };
         
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
         {
-            var gradeSum = 0;
             var gradeMaxSum = assignmentDb.ExerciseSet.ExerciseList.Count * 100;
-            
-            foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswerList)
-            {
-                gradeSum += exerciseAnswer.Grade;
-                gradeMaxSum += 100;
-            }
-            
+            var gradeSum = assignmentSubmissionDb.ExerciseAnswerList.Sum(exerciseAnswer => exerciseAnswer.Grade);
+
             var studentDb = await assignmentRepository.GetUserByIdAsync(assignmentSubmissionDb.StudentId);
             
             if (studentDb is null) return NotFound("Student not found.");
@@ -107,7 +108,16 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
                     IsTeacher = studentDb.IsTeacher,
                     FirstTimeSignIn = studentDb.FirstTimeSignIn
                 },
-                Score = (float)gradeSum / gradeMaxSum
+                Score = (float)gradeSum / gradeMaxSum,
+                ExerciseAnswerList = assignmentSubmissionDb
+                    .ExerciseAnswerList
+                    .Select(exerciseAnswer => new ExerciseAnswerDto
+                    {
+                        Id = exerciseAnswer.Id,
+                        ExerciseId = exerciseAnswer.ExerciseId,
+                        Grade = exerciseAnswer.Grade,
+                        Feedback = exerciseAnswer.Feedback
+                    }).ToList()
             };
             
             assignment.AssignmentSubmissionList.Add(assignmentSubmission);
