@@ -37,6 +37,7 @@ public class ExerciseAnswer
     {
         Id = Guid.NewGuid().ToString();
         AssistantId = string.Empty;
+        FileId = string.Empty;
         Feedback = string.Empty;
         AssignmentSubmissionId = string.Empty;
         ExerciseId = string.Empty;
