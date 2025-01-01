@@ -1,4 +1,3 @@
-using AutoMapper;
 using mathAi_backend.Dtos;
 using mathAi_backend.Helpers;
 using mathAi_backend.Models;
@@ -76,7 +75,15 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
             DueDate = assignmentDb.DueDate,
             ClassId = assignmentDb.Class.Id,
             ClassName = assignmentDb.Class.Name,
-            ExerciseSetId = assignmentDb.ExerciseSetId
+            ExerciseSetId = assignmentDb.ExerciseSetId,
+            ExerciseList = assignmentDb
+                .ExerciseSet
+                .ExerciseList
+                .Select(exercise => new ExerciseDto 
+                {
+                    Id = exercise.Id,
+                    Content = exercise.Content
+                }).ToList()
         };
         
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)

@@ -8,5 +8,6 @@ public class AssignmentDto
     public string ClassId { get; set; } = string.Empty;
     public string ClassName { get; set; } = string.Empty;
     public string ExerciseSetId { get; set; } = string.Empty;
+    public virtual ICollection<ExerciseDto> ExerciseList { get; set; } = [];
     public virtual ICollection<AssignmentSubmissionListDto> AssignmentSubmissionList { get; set; } = [];
 }
