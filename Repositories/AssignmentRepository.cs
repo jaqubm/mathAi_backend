@@ -58,6 +58,8 @@ public class AssignmentRepository(IConfiguration config) : IAssignmentRepository
         return await _entityFramework
             .Assignment
             .Include(a => a.Class)
+            .Include(a => a.ExerciseSet)
+            .ThenInclude(s => s.ExerciseList)
             .Include(a => a.AssignmentSubmissionList)
             .ThenInclude(s => s.ExerciseAnswerList)
             .FirstOrDefaultAsync(a => a.Id == assignmentId);

@@ -65,6 +65,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         
         if (assignmentDb is null) return NotFound("Assignment not found.");
         if (assignmentDb.Class is null) return NotFound("Class not found.");
+        if (assignmentDb.ExerciseSet is null) return NotFound("Exercise set not found.");
         if (!assignmentDb.Class.OwnerId.Equals(userId) && assignmentDb.AssignmentSubmissionList.All(s => s.StudentId != userId)) 
             return Unauthorized("You are not authorized to see this assignment.");
 
@@ -81,7 +82,7 @@ public class AssignmentController(IAssignmentRepository assignmentRepository) : 
         foreach (var assignmentSubmissionDb in assignmentDb.AssignmentSubmissionList)
         {
             var gradeSum = 0;
-            var gradeMaxSum = 0;
+            var gradeMaxSum = assignmentDb.ExerciseSet.ExerciseList.Count * 100;
             
             foreach (var exerciseAnswer in assignmentSubmissionDb.ExerciseAnswerList)
             {
